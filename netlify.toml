@@ -1,0 +1,15 @@
+# Netlify-Build-Konfiguration für TrainSmart
+# https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # SvelteKit-Build via Vite
+  command = "npm run build"
+  # Output-Verzeichnis wird vom Adapter automatisch befüllt
+  publish = "build"
+
+[build.environment]
+  # Pinning auf Node 20 (LTS) — vermeidet "neuestes Node bricht plötzlich"
+  NODE_VERSION = "20"
+
+# SPA-Fallback: Alle nicht-statischen Routes gehen an SvelteKit weiter.
+# Wird vom adapter-netlify automatisch gehandhabt, hier nur als Doku.
