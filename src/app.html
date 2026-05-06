@@ -1,9 +1,24 @@
 <!doctype html>
-<html lang="en">
+<html lang="de-CH">
 	<head>
 		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 		<meta name="text-scale" content="scale" />
+
+		<!-- PWA: Auf Home-Bildschirm installierbar -->
+		<link rel="manifest" href="/manifest.webmanifest" />
+		<meta name="theme-color" content="#0a0e14" />
+		<meta name="description" content="TrainSmart — Intelligentes Trainingslog für Mehrsportler" />
+
+		<!-- iOS-spezifisch: Apple-Web-App-Mode + Status-Bar -->
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+		<meta name="apple-mobile-web-app-title" content="TrainSmart" />
+		<link rel="apple-touch-icon" href="/icon-192.svg" />
+
+		<!-- Browser-Tab-Icon -->
+		<link rel="icon" type="image/svg+xml" href="/icon.svg" />
+
 		%sveltekit.head%
 	</head>
 	<body data-sveltekit-preload-data="hover">
