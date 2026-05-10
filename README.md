@@ -4,6 +4,8 @@ Intelligentes Trainingslog für Mehrsportler. Trackt Sessions, berechnet Tagesem
 
 **Entwickelt als ZHAW Prototyping-Projekt (Semester 4) — Albushi Pupovci**
 
+🔗 **Live-Demo:** [trainsmartv1.netlify.app](https://trainsmartv1.netlify.app)
+
 ---
 
 ## Projektbeschreibung
@@ -131,14 +133,15 @@ src/
 
 ## Deployment
 
-**Status:** Aktuell in Vorbereitung. Geplant auf Netlify mit MongoDB Atlas als Datenbank.
+**Status:** ✅ Live auf [trainsmartv1.netlify.app](https://trainsmartv1.netlify.app)
 
-Geplante Schritte:
-1. `@sveltejs/adapter-netlify` installieren (`npm install -D @sveltejs/adapter-netlify`)
-2. `svelte.config.js` auf Netlify-Adapter umstellen (`adapter-auto` → `adapter-netlify`)
-3. `netlify.toml` mit Build-Settings im Projekt-Root anlegen
-4. Atlas-Cluster erstellen, Connection-String als Netlify-Env-Variable `MONGODB_URI` hinterlegen
-5. Repo mit Netlify verbinden, automatisches Deployment per Git-Push
+**Stack:**
+- **Hosting:** Netlify (automatisches Deployment per Git-Push)
+- **Datenbank:** MongoDB Atlas
+- **Adapter:** `@sveltejs/adapter-netlify`
+- **Konfiguration:** `netlify.toml` mit Node 20
+
+**Deployment-Pipeline:** Push auf `main` → Netlify-Build → Live in ~2 Min
 
 ---
 
@@ -157,7 +160,7 @@ Alle Designentscheidungen, Architektur-Wahlen und implementierten Features wurde
 
 | Kriterium                          | Status                              |
 |------------------------------------|-------------------------------------|
-| Funktionierender Prototyp          | Lokal: ja / Deployed: in Arbeit     |
+| Funktionierender Prototyp          | Lokal: ja / Deployed: ja            |
 | GitHub Repo mit Commit-Verlauf     | ja                                  |
 | README mit Setup + KI-Deklaration  | ja                                  |
 | Usability Evaluation               | Geplant: 19.05.2026                 |
