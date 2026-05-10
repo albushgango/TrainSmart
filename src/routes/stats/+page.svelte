@@ -183,7 +183,7 @@
             <a href="/log/new" class="empty-btn">+ Session loggen</a>
         </div>
     {:else}
-        <!-- Tab-Header mit Underline-Indikator (MCI-Style) -->
+        <!-- Tab-Header mit Underline-Indikator -->
         <div class="tabs" role="tablist">
             <button class="tab" class:aktiv={aktiverTab === 'uebersicht'}
                 role="tab" aria-selected={aktiverTab === 'uebersicht'}
@@ -570,7 +570,7 @@
         transform: translateY(-1px);
     }
 
-    /* Tab-System: Underline-Indikator (MCI-Style) */
+    /* Tab-System: Underline-Indikator */
     .tabs {
         display: flex;
         gap: 1.5rem;

@@ -210,7 +210,7 @@
         text-transform: uppercase;
     }
 
-    /* Streak Badge — kompakt im MCI-Style: Flame + Zahl horizontal */
+    /* Streak Badge — kompakt: Flame + Zahl horizontal */
     .streak-badge {
         display: flex;
         align-items: center;
@@ -465,7 +465,7 @@
         color: var(--text-tertiary);
     }
 
-    /* Quick-Log — primärer CTA im weissen MCI-Style */
+    /* Quick-Log — primärer CTA in Weiss */
     .quick-log-btn {
         display: flex;
         align-items: center;

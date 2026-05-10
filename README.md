@@ -180,7 +180,7 @@ Beschreibt die **gestaltete und implementierte App** – nicht das Mockup. An ei
 
 - **User Interface Design:**
 
-    Dark-Theme mit Lime-Akzentfarbe und sport-spezifischen Highlights (Kraft=Rot, Laufen=Lime, Rad=Cyan, Schwimmen=Blau). Inspiriert von der MCI-Solutions-App in Bezug auf ALL-CAPS-Headers, klare Tab-Navigation und subtile Glow-Effekte.
+    Dark-Theme mit Lime-Akzentfarbe und sport-spezifischen Highlights (Kraft=Rot, Laufen=Lime, Rad=Cyan, Schwimmen=Blau). ALL-CAPS-Headers, klare Tab-Navigation, subtile Glow-Effekte für aktive Zustände.
 
     **Wichtige Screens:**
     - **Dashboard**: ALL-CAPS-Header ("DASHBOARD"), Streak-Pill oben rechts, klickbarer Wochenkalender (7 Pills mit Aktivitäts-Punkten), Empfehlungs-Card mit farbigem Glow, Wochenziel-Fortschrittsbalken, Tag-spezifische Sessions-Liste
@@ -534,7 +534,7 @@ Die folgenden Erweiterungen wurden über den Mindestumfang der Übungen ab SW8 h
     - **Architektur-Entscheidungen:** Wahl von SvelteKit, MongoDB, Netlify; Single-User vs. Multi-User; PWA-Ansatz
     - **Code-Reviews:** Jede von Claude generierte Code-Änderung wurde durchgesehen, Diffs vor Commits geprüft
     - **Bug-Reports:** Beim Live-Testen identifizierte Bugs (CSV-404, Datum-Future, Übungs-Liste) wurden vom Entwickler entdeckt und reportet
-    - **UX-Feedback und Polish-Wünsche:** Design-Iterations-Wünsche (MCI-inspiriert, ALL-CAPS, Mini-Sparkline, Wochenkalender klickbar) kamen vom Entwickler
+    - **UX-Feedback und Polish-Wünsche:** Design-Iterations-Wünsche (ALL-CAPS-Headers, Mini-Sparkline, Wochenkalender klickbar, Tab-Navigation) kamen vom Entwickler
     - **Evaluation und Tester-Auswahl** (Phase 5): wird komplett vom Entwickler durchgeführt
 
 ### 6.2 Prompt-Vorgehen
@@ -564,8 +564,7 @@ Welche Variante würdest du als Senior-Dev priorisieren und warum?"
 Client- UND Server-Seite."
 
 "Ich will einen klickbaren Wochenkalender auf der Home-Page.
-Mockup-Inspiration: MCI Solutions App. Schlage Konzept vor,
-dann bauen."
+Schlage Konzept vor, dann bauen."
 ```
 
 **Qualitätssicherung:**
@@ -666,7 +665,6 @@ npm run preview
 - **SvelteKit Dokumentation:** [svelte.dev/docs/kit](https://svelte.dev/docs/kit)
 - **Mongoose Dokumentation:** [mongoosejs.com/docs](https://mongoosejs.com/docs)
 - **Netlify Adapter Docs:** [github.com/sveltejs/kit/tree/main/packages/adapter-netlify](https://github.com/sveltejs/kit/tree/main/packages/adapter-netlify)
-- **Design-Inspiration MCI Solutions:** [mcisolutions.de](https://mcisolutions.de) (Dark-Theme, ALL-CAPS-Header, Tab-Underline)
 - **Mermaid für Diagramme:** [mermaid.js.org](https://mermaid.js.org)
 
 ### 7.4 Lizenz

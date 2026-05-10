@@ -125,7 +125,7 @@
         --error-text: #fca5a5;
         --error-border: rgba(239, 68, 68, 0.3);
 
-        /* CTA-Buttons (MCI-Style: weisser Background, dunkler Text) */
+        /* CTA-Buttons: weisser Background, dunkler Text */
         --cta-bg: #f0f6fc;
         --cta-bg-hover: #ffffff;
         --cta-color: #0a0e14;
