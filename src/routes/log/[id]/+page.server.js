@@ -3,6 +3,7 @@ import Session from '$lib/server/models/session.js';
 import Uebung from '$lib/server/models/uebung.js';
 import { holeOderErstelleProfil } from '$lib/server/models/profil.js';
 import { SPLITS } from '$lib/splits.js';
+import { ALLE_UEBUNGEN } from '$lib/uebungen.js';
 import { error, fail, redirect } from '@sveltejs/kit';
 import mongoose from 'mongoose';
 
@@ -62,8 +63,13 @@ export async function load({ params }) {
         aktiveSplitTage = SPLITS[profil.aktiverSplit].tage;
     }
 
-    // Auto-Complete-Vorschläge: zuletzt genutzte Übungs-Namen
+    // Auto-Complete-Vorschläge: vordefinierte Übungen + bisher genutzte
+    // (Set entfernt Duplikate, History-Übungen die schon in der vordefinierten Liste sind)
     const distinctNamen = await Uebung.distinct('name');
+    const alleNamen = [...new Set([
+        ...ALLE_UEBUNGEN.map(u => u.name),
+        ...distinctNamen
+    ])].sort();
 
     return {
         session: {
@@ -73,7 +79,7 @@ export async function load({ params }) {
         },
         uebungen: uebungenMitVergleich,
         aktiveSplitTage,
-        uebungsVorschlaege: distinctNamen.sort()
+        uebungsVorschlaege: alleNamen
     };
 }
 
@@ -94,6 +100,13 @@ export const actions = {
 
         if (!sport || !datum || !dauer || !rpe) {
             return fail(400, { error: 'Bitte alle Pflichtfelder ausfüllen.' });
+        }
+
+        // Datum darf nicht in der Zukunft liegen
+        const heute = new Date();
+        heute.setHours(23, 59, 59, 999);
+        if (new Date(datum) > heute) {
+            return fail(400, { error: 'Das Datum darf nicht in der Zukunft liegen.' });
         }
 
         try {

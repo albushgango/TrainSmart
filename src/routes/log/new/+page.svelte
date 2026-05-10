@@ -156,7 +156,8 @@
                 </button>
             {/each}
         </div>
-        <input type="date" id="datum" name="datum" bind:value={datum} required />
+        <input type="date" id="datum" name="datum" bind:value={datum}
+            max={dateString(0)} required />
 
         <label for="dauer" class="field-label">Dauer (Minuten)</label>
         <input type="number" id="dauer" name="dauer" min="1" max="600"

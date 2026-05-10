@@ -37,7 +37,7 @@
         </div>
         <div class="header-aktionen">
             {#if sessions.length > 0}
-                <a href="/log/export" class="btn-export" aria-label="Als CSV exportieren"
+                <a href="/export" class="btn-export" aria-label="Als CSV exportieren"
                     title="Als CSV exportieren">⤓</a>
             {/if}
             <a href="/log/new" class="btn-primary" aria-label="Neue Session loggen">+</a>

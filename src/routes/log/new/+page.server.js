@@ -53,6 +53,13 @@ export const actions = {
             return fail(400, { error: 'Bitte alle Pflichtfelder ausfüllen.' });
         }
 
+        // Datum darf nicht in der Zukunft liegen
+        const heute = new Date();
+        heute.setHours(23, 59, 59, 999); // Heute 23:59 — alles bis Tagesende erlauben
+        if (new Date(datum) > heute) {
+            return fail(400, { error: 'Das Datum darf nicht in der Zukunft liegen.' });
+        }
+
         await connectDB();
         const session = await Session.create({ sport, subtyp, datum, dauer, rpe, notiz });
 

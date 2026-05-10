@@ -3,6 +3,7 @@
     import { invalidateAll } from '$app/navigation';
     import { toast } from '$lib/toast.svelte.js';
     import { subtypenFuer } from '$lib/splits.js';
+    import { filtereUebungen } from '$lib/uebungen.js';
 
     let { data, form } = $props();
 
@@ -15,6 +16,11 @@
     let neueUebungAktiv = $state(false);
     let editUebungId = $state(null);  // ID der gerade editierten Übung
     let uebungLoeschId = $state(null); // ID der zu löschenden Übung
+
+    // Combobox-State für die "Neue Übung"-Form (Custom-Dropdown)
+    let neuName = $state('');
+    let neuDropdownOffen = $state(false);
+    let gefiltert = $derived(filtereUebungen(neuName));
 
     // Edit-State (initialisiert mit aktuellen Werten der Session)
     let sport = $state(session.sport);
@@ -234,12 +240,51 @@
                     {/if}
                 {/if}
 
-                <!-- Form für neue Übung -->
+                <!-- Form für neue Übung mit Custom-Combobox -->
                 {#if neueUebungAktiv}
                     <form method="POST" action="?/uebungHinzufuegen"
-                        use:enhance class="uebung-form neue">
-                        <input type="text" name="name" placeholder="z.B. Bench Press" required
-                            class="uebung-name-input" list="uebungs-vorschlaege" autofocus />
+                        use:enhance={() => {
+                            return async ({ update }) => {
+                                await update();
+                                neuName = '';
+                                neuDropdownOffen = false;
+                            };
+                        }}
+                        class="uebung-form neue">
+
+                        <!-- Combobox: Suche + gruppiertes Dropdown -->
+                        <div class="ue-combobox-detail">
+                            <input type="text" name="name" required
+                                class="uebung-name-input"
+                                placeholder="Übung suchen oder eingeben..."
+                                bind:value={neuName}
+                                onfocus={() => (neuDropdownOffen = true)}
+                                autocomplete="off" />
+
+                            {#if neuDropdownOffen}
+                                <div class="ue-dropdown-detail">
+                                    {#each Object.entries(gefiltert) as [gruppe, namen]}
+                                        <div class="ue-gruppe-header">{gruppe}</div>
+                                        {#each namen as n}
+                                            <button type="button"
+                                                class="ue-vorschlag"
+                                                onclick={() => {
+                                                    neuName = n;
+                                                    neuDropdownOffen = false;
+                                                }}>
+                                                {n}
+                                            </button>
+                                        {/each}
+                                    {/each}
+                                    {#if Object.keys(gefiltert).length === 0}
+                                        <div class="ue-leer">
+                                            Keine Treffer — wird als eigene Übung gespeichert
+                                        </div>
+                                    {/if}
+                                </div>
+                            {/if}
+                        </div>
+
                         <div class="uebung-werte">
                             <div class="wert-feld">
                                 <input type="number" name="saetze" min="1" max="20"
@@ -262,7 +307,11 @@
                         <div class="uebung-form-aktionen">
                             <button type="submit" class="btn-uebung-save">Hinzufügen</button>
                             <button type="button" class="btn-uebung-cancel"
-                                onclick={() => (neueUebungAktiv = false)}>Abbrechen</button>
+                                onclick={() => {
+                                    neueUebungAktiv = false;
+                                    neuName = '';
+                                    neuDropdownOffen = false;
+                                }}>Abbrechen</button>
                         </div>
                     </form>
                 {/if}
@@ -310,7 +359,8 @@
             {/if}
 
             <label for="datum" class="field-label">Datum</label>
-            <input type="date" id="datum" name="datum" bind:value={datum} required />
+            <input type="date" id="datum" name="datum" bind:value={datum}
+                max={new Date().toISOString().split('T')[0]} required />
 
             <label for="dauer" class="field-label">Dauer (Minuten)</label>
             <input type="number" id="dauer" name="dauer" min="1" max="600"
@@ -963,6 +1013,62 @@
 
     .btn-uebung-delete:hover {
         background: rgba(239, 68, 68, 0.1);
+    }
+
+    /* Combobox in Detail-Page für neue Übung */
+    .ue-combobox-detail {
+        position: relative;
+    }
+
+    .ue-dropdown-detail {
+        position: absolute;
+        top: calc(100% + 4px);
+        left: 0;
+        right: 0;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-md);
+        max-height: 240px;
+        overflow-y: auto;
+        z-index: 50;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .ue-gruppe-header {
+        padding: 0.55rem 0.85rem 0.3rem;
+        font-size: 0.7rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--text-tertiary);
+        background: var(--bg-input);
+    }
+
+    .ue-vorschlag {
+        display: block;
+        width: 100%;
+        text-align: left;
+        background: transparent;
+        border: none;
+        padding: 0.6rem 0.85rem;
+        color: var(--text-primary);
+        font-size: 0.9rem;
+        font-family: inherit;
+        cursor: pointer;
+        transition: background 0.1s;
+    }
+
+    .ue-vorschlag:hover {
+        background: var(--bg-card);
+        color: var(--accent);
+    }
+
+    .ue-leer {
+        padding: 0.85rem;
+        color: var(--text-tertiary);
+        font-size: 0.85rem;
+        font-style: italic;
+        text-align: center;
     }
 
     .btn-add-uebung {
