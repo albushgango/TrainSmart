@@ -1,6 +1,6 @@
 <script>
     import { subtypenFuer } from '$lib/splits.js';
-    import { filtereUebungen } from '$lib/uebungen.js';
+    import { filtereUebungen, SUBTYP_GRUPPEN } from '$lib/uebungen.js';
 
     let { data, form } = $props();
     let rpe = $state(5);
@@ -51,9 +51,13 @@
     let saetzeInput = $state(4);
     let wdhInput = $state(8);
     let gewichtInput = $state(0);
+    // Toggle: wenn aktiv, ignoriert die Filterung den Subtyp und zeigt alle Übungen
+    let alleUebungenZeigen = $state(false);
 
-    // Gefilterte Übungen-Vorschläge aus der Bibliothek
-    let gefiltert = $derived(filtereUebungen(uebungSuche));
+    // Gefilterte Übungen — berücksichtigt Subtyp (sofern Toggle nicht "alle" ist)
+    let gefiltert = $derived(
+        filtereUebungen(uebungSuche, alleUebungenZeigen ? '' : finalerSubtyp)
+    );
 
     function uebungWaehlen(name) {
         uebungSuche = name;
@@ -214,6 +218,20 @@
 
                         {#if dropdownOffen}
                             <div class="ue-dropdown">
+                                <!-- Toggle: nur passende zum Subtyp ODER alle -->
+                                {#if finalerSubtyp && SUBTYP_GRUPPEN[finalerSubtyp]}
+                                    <div class="ue-toggle-zeile">
+                                        <span class="ue-toggle-info">
+                                            {alleUebungenZeigen ? 'Alle Übungen' : `Passend zu ${finalerSubtyp}`}
+                                        </span>
+                                        <button type="button"
+                                            class="ue-toggle-btn"
+                                            onclick={() => (alleUebungenZeigen = !alleUebungenZeigen)}>
+                                            {alleUebungenZeigen ? 'nur passende' : 'alle anzeigen'}
+                                        </button>
+                                    </div>
+                                {/if}
+
                                 {#each Object.entries(gefiltert) as [gruppe, namen]}
                                     <div class="ue-gruppe-header">{gruppe}</div>
                                     {#each namen as n}
@@ -718,6 +736,41 @@
         letter-spacing: 0.08em;
         color: var(--text-tertiary);
         background: var(--bg-input);
+    }
+
+    /* Toggle-Zeile im Dropdown: zeigt aktuellen Filter-Status + Umschalt-Button */
+    .ue-toggle-zeile {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0.85rem;
+        background: var(--bg-input);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .ue-toggle-info {
+        font-size: 0.78rem;
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .ue-toggle-btn {
+        background: transparent;
+        border: 1px solid var(--border-strong);
+        color: var(--text-secondary);
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+    }
+
+    .ue-toggle-btn:hover {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border-color: var(--accent);
     }
 
     .ue-vorschlag {

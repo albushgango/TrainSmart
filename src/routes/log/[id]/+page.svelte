@@ -3,7 +3,7 @@
     import { invalidateAll } from '$app/navigation';
     import { toast } from '$lib/toast.svelte.js';
     import { subtypenFuer } from '$lib/splits.js';
-    import { filtereUebungen } from '$lib/uebungen.js';
+    import { filtereUebungen, SUBTYP_GRUPPEN } from '$lib/uebungen.js';
 
     let { data, form } = $props();
 
@@ -20,7 +20,15 @@
     // Combobox-State für die "Neue Übung"-Form (Custom-Dropdown)
     let neuName = $state('');
     let neuDropdownOffen = $state(false);
-    let gefiltert = $derived(filtereUebungen(neuName));
+    // Toggle: ignoriert Subtyp-Filter, zeigt alle Übungen
+    let neuAlleZeigen = $state(false);
+
+    // Subtyp der aktuellen Session — bestimmt welche Übungen vorgeschlagen werden
+    let sessionSubtyp = $derived(session.subtyp ?? '');
+
+    let gefiltert = $derived(
+        filtereUebungen(neuName, neuAlleZeigen ? '' : sessionSubtyp)
+    );
 
     // Edit-State (initialisiert mit aktuellen Werten der Session)
     let sport = $state(session.sport);
@@ -263,6 +271,20 @@
 
                             {#if neuDropdownOffen}
                                 <div class="ue-dropdown-detail">
+                                    <!-- Toggle: passend zum Session-Subtyp ODER alle -->
+                                    {#if sessionSubtyp && SUBTYP_GRUPPEN[sessionSubtyp]}
+                                        <div class="ue-toggle-zeile">
+                                            <span class="ue-toggle-info">
+                                                {neuAlleZeigen ? 'Alle Übungen' : `Passend zu ${sessionSubtyp}`}
+                                            </span>
+                                            <button type="button"
+                                                class="ue-toggle-btn"
+                                                onclick={() => (neuAlleZeigen = !neuAlleZeigen)}>
+                                                {neuAlleZeigen ? 'nur passende' : 'alle anzeigen'}
+                                            </button>
+                                        </div>
+                                    {/if}
+
                                     {#each Object.entries(gefiltert) as [gruppe, namen]}
                                         <div class="ue-gruppe-header">{gruppe}</div>
                                         {#each namen as n}
@@ -1042,6 +1064,40 @@
         letter-spacing: 0.08em;
         color: var(--text-tertiary);
         background: var(--bg-input);
+    }
+
+    .ue-toggle-zeile {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.6rem 0.85rem;
+        background: var(--bg-input);
+        border-bottom: 1px solid var(--border);
+    }
+
+    .ue-toggle-info {
+        font-size: 0.78rem;
+        color: var(--accent);
+        font-weight: 600;
+    }
+
+    .ue-toggle-btn {
+        background: transparent;
+        border: 1px solid var(--border-strong);
+        color: var(--text-secondary);
+        padding: 0.3rem 0.7rem;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+    }
+
+    .ue-toggle-btn:hover {
+        background: var(--bg-card);
+        color: var(--text-primary);
+        border-color: var(--accent);
     }
 
     .ue-vorschlag {
