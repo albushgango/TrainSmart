@@ -1,6 +1,7 @@
 <script>
     import { subtypenFuer } from '$lib/splits.js';
     import { filtereUebungen, SUBTYP_GRUPPEN } from '$lib/uebungen.js';
+    import { paceProKm, geschwindigkeitKmh } from '$lib/lauf.js';
 
     let { data, form } = $props();
     let rpe = $state(5);
@@ -99,6 +100,30 @@
         dropdownOffen = false;
         neueUebungAktiv = false;
     }
+
+    // ────────── Lauf-spezifische Felder (nur sichtbar bei Sport='Laufen' / 'Rad') ──────────
+    let distanz = $state('');     // km, als String für freie Eingabe
+    let avgHr = $state('');       // bpm
+    let hoehenmeter = $state(''); // m
+    let dauerInput = $state(''); // für Live-Pace-Berechnung
+
+    // Live-Berechnungen
+    let livePace = $derived.by(() => {
+        const d = Number(dauerInput);
+        const km = Number(distanz);
+        return paceProKm(d, km);
+    });
+
+    let liveSpeed = $derived.by(() => {
+        const d = Number(dauerInput);
+        const km = Number(distanz);
+        return geschwindigkeitKmh(d, km);
+    });
+
+    // Sport-Klassifizierung für UI-Logik
+    let istLaufen = $derived(sport === 'Laufen');
+    let istRad = $derived(sport === 'Rad');
+    let zeigtDistanzFeld = $derived(istLaufen || istRad);
 </script>
 
 <div class="page">
@@ -165,7 +190,54 @@
 
         <label for="dauer" class="field-label">Dauer (Minuten)</label>
         <input type="number" id="dauer" name="dauer" min="1" max="600"
-            placeholder="60" required />
+            placeholder="60" required bind:value={dauerInput} />
+
+        <!-- Lauf-/Rad-spezifische Felder mit Live-Pace-Vorschau -->
+        {#if zeigtDistanzFeld}
+            <div class="lauf-sektion">
+                <div class="lauf-header">
+                    <span class="lauf-titel">{istLaufen ? '🏃 Lauf-Daten' : '🚴 Rad-Daten'}</span>
+                    <span class="lauf-optional">optional</span>
+                </div>
+
+                <div class="lauf-grid">
+                    <div class="lauf-feld">
+                        <input type="number" name="distanz" min="0" max="500" step="0.01"
+                            placeholder="0.00" bind:value={distanz} />
+                        <span class="lauf-feld-label">Distanz (km)</span>
+                    </div>
+                    <div class="lauf-feld">
+                        <input type="number" name="avgHr" min="30" max="250"
+                            placeholder="—" bind:value={avgHr} />
+                        <span class="lauf-feld-label">Ø HR (bpm)</span>
+                    </div>
+                    {#if istLaufen}
+                        <div class="lauf-feld">
+                            <input type="number" name="hoehenmeter" min="0" max="10000"
+                                placeholder="—" bind:value={hoehenmeter} />
+                            <span class="lauf-feld-label">Höhenmeter</span>
+                        </div>
+                    {/if}
+                </div>
+
+                {#if livePace || liveSpeed}
+                    <div class="lauf-vorschau">
+                        {#if istLaufen && livePace}
+                            <div class="lv-item">
+                                <span class="lv-label">Pace</span>
+                                <span class="lv-wert">{livePace.formatted} <span class="lv-einheit">min/km</span></span>
+                            </div>
+                        {/if}
+                        {#if liveSpeed}
+                            <div class="lv-item">
+                                <span class="lv-label">{istLaufen ? 'Tempo' : 'Schnitt'}</span>
+                                <span class="lv-wert">{liveSpeed} <span class="lv-einheit">km/h</span></span>
+                            </div>
+                        {/if}
+                    </div>
+                {/if}
+            </div>
+        {/if}
 
         <label for="rpe" class="field-label">
             Intensität <span class="rpe-wert">RPE {rpe}/10</span>
@@ -878,6 +950,118 @@
 
     .ue-abbrechen:hover {
         background: var(--bg-elevated);
+    }
+
+    /* ─── Lauf-/Rad-Sektion ─── */
+    .lauf-sektion {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1rem;
+        margin-top: 1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .lauf-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+
+    .lauf-titel {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .lauf-optional {
+        font-size: 0.7rem;
+        color: var(--text-tertiary);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-weight: 600;
+    }
+
+    .lauf-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.5rem;
+    }
+
+    /* Bei Rad: nur 2 Spalten (kein Höhenmeter) */
+    .lauf-grid:has(.lauf-feld:nth-child(2):last-child) {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .lauf-feld {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .lauf-feld input {
+        padding: 0.6rem 0.5rem;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        text-align: center;
+        font-weight: 700;
+        font-family: inherit;
+    }
+
+    .lauf-feld input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    .lauf-feld-label {
+        font-size: 0.65rem;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-tertiary);
+        font-weight: 600;
+    }
+
+    /* Live-Vorschau: Pace + Speed */
+    .lauf-vorschau {
+        display: flex;
+        gap: 1.25rem;
+        padding-top: 0.6rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .lv-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+    }
+
+    .lv-label {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-tertiary);
+        font-weight: 600;
+    }
+
+    .lv-wert {
+        font-size: 1.15rem;
+        font-weight: 800;
+        color: var(--accent);
+        letter-spacing: -0.02em;
+    }
+
+    .lv-einheit {
+        font-size: 0.7rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
     }
 
     /* Submit & Cancel — weisser CTA */

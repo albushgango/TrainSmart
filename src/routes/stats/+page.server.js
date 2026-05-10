@@ -1,6 +1,7 @@
 import { connectDB } from '$lib/server/db.js';
 import Session from '$lib/server/models/session.js';
 import Uebung from '$lib/server/models/uebung.js';
+import { paceProKm, schnellstePace } from '$lib/lauf.js';
 
 /** Berechnet ISO-Wochennummer für ein Datum */
 function isoWoche(datum) {
@@ -150,6 +151,71 @@ export async function load() {
         };
     }).sort((a, b) => b.max - a.max); // Schwerste Übungen zuerst
 
+    // ─── Lauf-spezifische Records + Verlauf ───
+    const laufSessions = alleSessions
+        .filter(s => s.sport === 'Laufen' && Number.isFinite(s.distanz) && s.distanz > 0);
+
+    let laufFortschritt = null;
+    if (laufSessions.length > 0) {
+        // Records
+        const laengsteDistanz = laufSessions.reduce((max, s) =>
+            (!max || s.distanz > max.distanz) ? s : max, null);
+        const schnellsteSession = schnellstePace(laufSessions);
+        const hoechsteHr = laufSessions
+            .filter(s => Number.isFinite(s.avgHr))
+            .reduce((max, s) => (!max || s.avgHr > max.avgHr) ? s : max, null);
+        const meisteHm = laufSessions
+            .filter(s => Number.isFinite(s.hoehenmeter))
+            .reduce((max, s) => (!max || s.hoehenmeter > max.hoehenmeter) ? s : max, null);
+
+        // Verlauf für Charts (chronologisch ältest → jüngst)
+        const verlauf = laufSessions
+            .slice()
+            .sort((a, b) => new Date(a.datum) - new Date(b.datum))
+            .map(s => {
+                const pace = paceProKm(s.dauer, s.distanz);
+                return {
+                    _id: s._id.toString(),
+                    datum: s.datum.toISOString(),
+                    dauer: s.dauer,
+                    distanz: s.distanz,
+                    rpe: s.rpe,
+                    avgHr: s.avgHr ?? null,
+                    hoehenmeter: s.hoehenmeter ?? null,
+                    paceFormatted: pace?.formatted ?? null,
+                    paceSekunden: pace?.totalSekunden ?? null
+                };
+            });
+
+        const schnellstePaceFormat = schnellsteSession
+            ? paceProKm(schnellsteSession.dauer, schnellsteSession.distanz)
+            : null;
+
+        laufFortschritt = {
+            anzahl: laufSessions.length,
+            records: {
+                laengsteDistanz: laengsteDistanz ? {
+                    distanz: laengsteDistanz.distanz,
+                    datum: laengsteDistanz.datum.toISOString()
+                } : null,
+                schnellstePace: schnellstePaceFormat ? {
+                    formatted: schnellstePaceFormat.formatted,
+                    distanz: schnellsteSession.distanz,
+                    datum: schnellsteSession.datum.toISOString()
+                } : null,
+                hoechsteHr: hoechsteHr ? {
+                    bpm: hoechsteHr.avgHr,
+                    datum: hoechsteHr.datum.toISOString()
+                } : null,
+                meisteHm: meisteHm ? {
+                    meter: meisteHm.hoehenmeter,
+                    datum: meisteHm.datum.toISOString()
+                } : null
+            },
+            verlauf
+        };
+    }
+
     return {
         totals: {
             sessions: totalSessions,
@@ -160,6 +226,7 @@ export async function load() {
         sportVerteilung,
         heatmapTage,
         recordsProSport,
-        uebungsFortschritt
+        uebungsFortschritt,
+        laufFortschritt
     };
 }

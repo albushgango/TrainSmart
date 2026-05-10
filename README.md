@@ -472,6 +472,18 @@ Die folgenden Erweiterungen wurden über den Mindestumfang der Übungen ab SW8 h
     - [`src/routes/+layout.svelte`](src/routes/+layout.svelte) (URL-Parameter-Auslöser nach Form-Action-Redirects)
 - **Aus Evaluation abgeleitet?:** Nein
 
+### 4.13 Lauf-spezifisches Tracking mit Pace-Verlauf
+
+- **Beschreibung & Nutzen:** Bei Sport=Laufen werden im Loggen-Form drei zusätzliche Felder angezeigt: **Distanz** (km), **avg HR** (bpm – passt zur Garmin-HRM-600 des Entwicklers), **Höhenmeter** (m). Pace und Geschwindigkeit werden live während der Eingabe berechnet (z.B. "5:30 min/km · 10.9 km/h"). Im Stats-Fortschritt-Tab gibt es einen eigenen Lauf-Bereich mit vier Lauf-spezifischen Personal Records (Längste Distanz, Schnellste Pace, Höchste Ø HR, Meiste Höhenmeter), einem Pace-Verlaufs-Chart (invertierte Y-Achse: niedriger = schneller) und einem Distanz-Verlaufs-Chart über alle gespeicherten Lauf-Sessions. Lauf-Cards in der Sessions-Liste zeigen Distanz prominent statt nur Dauer.
+- **Wo umgesetzt:**
+    - Helpers: [`src/lib/lauf.js`](src/lib/lauf.js) – `paceProKm()`, `geschwindigkeitKmh()`, `schnellstePace()`
+    - Datenbank: [`src/lib/server/models/session.js`](src/lib/server/models/session.js) – Felder `distanz`, `avgHr`, `hoehenmeter` (alle optional)
+    - Frontend Erfassen: [`src/routes/log/new/+page.svelte`](src/routes/log/new/+page.svelte) – Lauf-Sektion mit Live-Pace-Vorschau
+    - Frontend Detail: [`src/routes/log/[id]/+page.svelte`](src/routes/log/[id]/+page.svelte) – Lauf-Daten in Read- und Edit-Modus
+    - Frontend Stats: [`src/routes/stats/+page.svelte`](src/routes/stats/+page.svelte) – Lauf-Records, Pace-Chart, Distanz-Chart, Sessions-Detail-Liste
+    - Backend: Aggregations-Logik in [`src/routes/stats/+page.server.js`](src/routes/stats/+page.server.js)
+- **Aus Evaluation abgeleitet?:** Nein, eigene Initiative basierend auf Sport-Profil (Garmin-HRM-Nutzer, Laufintervalle)
+
 ### 4.12 Sport-Filter im Trainings-Log
 
 - **Beschreibung & Nutzen:** Pill-Leiste oben in `/log`: "Alle / Kraft / Laufen / Rad / Schwimmen". Aktive Pill nimmt die Sport-spezifische Akzentfarbe an. Filter via URL-Parameter (`?sport=Kraft`) → teilbar und reload-stabil.

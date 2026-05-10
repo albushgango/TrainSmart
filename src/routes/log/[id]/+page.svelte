@@ -4,6 +4,7 @@
     import { toast } from '$lib/toast.svelte.js';
     import { subtypenFuer } from '$lib/splits.js';
     import { filtereUebungen, SUBTYP_GRUPPEN } from '$lib/uebungen.js';
+    import { paceProKm, geschwindigkeitKmh } from '$lib/lauf.js';
 
     let { data, form } = $props();
 
@@ -39,6 +40,24 @@
     let rpe = $state(session.rpe);
     let notiz = $state(session.notiz ?? '');
 
+    // Lauf-/Rad-spezifische Felder
+    let distanz = $state(session.distanz ?? '');
+    let avgHr = $state(session.avgHr ?? '');
+    let hoehenmeter = $state(session.hoehenmeter ?? '');
+
+    // UI-Klassifizierung
+    let istLaufen = $derived(sport === 'Laufen');
+    let istRad = $derived(sport === 'Rad');
+    let zeigtLaufFelder = $derived(istLaufen || istRad);
+
+    // Live-Pace im Edit-Modus (basierend auf editierbaren Werten)
+    let editPace = $derived.by(() => paceProKm(Number(dauer), Number(distanz)));
+    let editSpeed = $derived.by(() => geschwindigkeitKmh(Number(dauer), Number(distanz)));
+
+    // Read-Modus: Pace aus gespeicherten Werten
+    let sessionPace = $derived.by(() => paceProKm(session.dauer, session.distanz));
+    let sessionSpeed = $derived.by(() => geschwindigkeitKmh(session.dauer, session.distanz));
+
     // Subtypen ableiten (Kraft hat aktive Split-Tage, andere Sportarten nur Standard)
     let verfuegbareSubtypen = $derived(
         sport ? subtypenFuer(sport, sport === 'Kraft' ? data.aktiveSplitTage : []) : []
@@ -72,6 +91,9 @@
         dauer = session.dauer;
         rpe = session.rpe;
         notiz = session.notiz ?? '';
+        distanz = session.distanz ?? '';
+        avgHr = session.avgHr ?? '';
+        hoehenmeter = session.hoehenmeter ?? '';
         bearbeitenAktiv = false;
     }
 
@@ -131,6 +153,38 @@
                     <span class="label">Intensität</span>
                     <span class="wert rpe-wert">RPE {session.rpe}/10</span>
                 </div>
+
+                {#if session.distanz}
+                    <div class="info-zeile">
+                        <span class="label">Distanz</span>
+                        <span class="wert">{session.distanz} km</span>
+                    </div>
+                {/if}
+                {#if sessionPace && istLaufen}
+                    <div class="info-zeile">
+                        <span class="label">Pace</span>
+                        <span class="wert rpe-wert">{sessionPace.formatted} min/km</span>
+                    </div>
+                {/if}
+                {#if sessionSpeed}
+                    <div class="info-zeile">
+                        <span class="label">{istLaufen ? 'Tempo' : 'Schnitt'}</span>
+                        <span class="wert">{sessionSpeed} km/h</span>
+                    </div>
+                {/if}
+                {#if session.avgHr}
+                    <div class="info-zeile">
+                        <span class="label">Ø Herzfrequenz</span>
+                        <span class="wert">{session.avgHr} bpm</span>
+                    </div>
+                {/if}
+                {#if session.hoehenmeter}
+                    <div class="info-zeile">
+                        <span class="label">Höhenmeter</span>
+                        <span class="wert">{session.hoehenmeter} m ↗</span>
+                    </div>
+                {/if}
+
                 {#if session.notiz}
                     <div class="info-zeile notiz-zeile">
                         <span class="label">Notiz</span>
@@ -387,6 +441,39 @@
             <label for="dauer" class="field-label">Dauer (Minuten)</label>
             <input type="number" id="dauer" name="dauer" min="1" max="600"
                 bind:value={dauer} required />
+
+            <!-- Lauf-/Rad-spezifische Felder im Edit-Modus -->
+            {#if zeigtLaufFelder}
+                <div class="lauf-edit-grid">
+                    <div class="lauf-edit-feld">
+                        <input type="number" name="distanz" min="0" max="500" step="0.01"
+                            placeholder="0.00" bind:value={distanz} />
+                        <span class="lauf-edit-label">Distanz (km)</span>
+                    </div>
+                    <div class="lauf-edit-feld">
+                        <input type="number" name="avgHr" min="30" max="250"
+                            placeholder="—" bind:value={avgHr} />
+                        <span class="lauf-edit-label">Ø HR (bpm)</span>
+                    </div>
+                    {#if istLaufen}
+                        <div class="lauf-edit-feld">
+                            <input type="number" name="hoehenmeter" min="0" max="10000"
+                                placeholder="—" bind:value={hoehenmeter} />
+                            <span class="lauf-edit-label">Höhenmeter</span>
+                        </div>
+                    {/if}
+                </div>
+                {#if editPace || editSpeed}
+                    <div class="lauf-edit-vorschau">
+                        {#if istLaufen && editPace}
+                            <span><strong>{editPace.formatted}</strong> min/km</span>
+                        {/if}
+                        {#if editSpeed}
+                            <span><strong>{editSpeed}</strong> km/h</span>
+                        {/if}
+                    </div>
+                {/if}
+            {/if}
 
             <label for="rpe" class="field-label">
                 Intensität <span class="rpe-anzeige">RPE {rpe}/10</span>
@@ -1145,6 +1232,67 @@
         background: var(--bg-card);
         color: var(--accent);
         border-color: var(--accent);
+    }
+
+    /* ─── Lauf-/Rad-Edit-Felder ─── */
+    .lauf-edit-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 0.45rem;
+        margin-top: 0.45rem;
+    }
+
+    .lauf-edit-grid:has(.lauf-edit-feld:nth-child(2):last-child) {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .lauf-edit-feld {
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .lauf-edit-feld input {
+        padding: 0.55rem 0.5rem;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 0.95rem;
+        color: var(--text-primary);
+        text-align: center;
+        font-weight: 700;
+        font-family: inherit;
+    }
+
+    .lauf-edit-feld input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    .lauf-edit-label {
+        font-size: 0.65rem;
+        text-align: center;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-tertiary);
+        font-weight: 600;
+    }
+
+    .lauf-edit-vorschau {
+        display: flex;
+        gap: 1.25rem;
+        padding: 0.6rem 0.85rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        margin-top: 0.5rem;
+    }
+
+    .lauf-edit-vorschau strong {
+        color: var(--accent);
+        font-weight: 800;
     }
 
     /* Subtyp-Pills im Edit */

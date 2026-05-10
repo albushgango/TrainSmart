@@ -98,6 +98,11 @@ export const actions = {
         const rpe = Number(data.get('rpe'));
         const notiz = data.get('notiz') ?? '';
 
+        // Lauf-/Rad-Felder (optional)
+        const distanzRaw = data.get('distanz');
+        const avgHrRaw = data.get('avgHr');
+        const hoehenmeterRaw = data.get('hoehenmeter');
+
         if (!sport || !datum || !dauer || !rpe) {
             return fail(400, { error: 'Bitte alle Pflichtfelder ausfüllen.' });
         }
@@ -109,11 +114,16 @@ export const actions = {
             return fail(400, { error: 'Das Datum darf nicht in der Zukunft liegen.' });
         }
 
+        // Lauf-Felder parsen — leerer String → null (Schema entfernt das Feld)
+        const distanz = distanzRaw && Number.isFinite(Number(distanzRaw)) ? Number(distanzRaw) : null;
+        const avgHr = avgHrRaw && Number.isFinite(Number(avgHrRaw)) ? Number(avgHrRaw) : null;
+        const hoehenmeter = hoehenmeterRaw && Number.isFinite(Number(hoehenmeterRaw)) ? Number(hoehenmeterRaw) : null;
+
         try {
             await connectDB();
             const updated = await Session.findByIdAndUpdate(
                 params.id,
-                { sport, subtyp, datum, dauer, rpe, notiz },
+                { sport, subtyp, datum, dauer, rpe, notiz, distanz, avgHr, hoehenmeter },
                 { new: true, runValidators: true }
             );
 

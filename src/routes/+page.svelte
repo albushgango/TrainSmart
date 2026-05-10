@@ -169,8 +169,13 @@
                             <span class="datum">{formatDatum(session.datum)}</span>
                         </div>
                         <div class="card-right">
-                            <span class="dauer">{session.dauer} min</span>
-                            <span class="rpe">RPE {session.rpe}</span>
+                            {#if session.distanz}
+                                <span class="dauer">{session.distanz} km</span>
+                                <span class="rpe">{session.dauer} min</span>
+                            {:else}
+                                <span class="dauer">{session.dauer} min</span>
+                                <span class="rpe">RPE {session.rpe}</span>
+                            {/if}
                         </div>
                     </a>
                 {/each}

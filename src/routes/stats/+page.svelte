@@ -1,6 +1,6 @@
 <script>
     let { data } = $props();
-    const { totals, wochenLoad, sportVerteilung, recordsProSport, uebungsFortschritt, heatmapTage } = data;
+    const { totals, wochenLoad, sportVerteilung, recordsProSport, uebungsFortschritt, heatmapTage, laufFortschritt } = data;
 
     function formatKurzes(iso) {
         return new Date(iso).toLocaleDateString('de-CH', {
@@ -12,7 +12,7 @@
     let sportFilter = $state('Kraft');
     const SPORTARTEN_FORTSCHRITT = [
         { id: 'Kraft', label: 'Kraft', verfuegbar: true },
-        { id: 'Laufen', label: 'Laufen', verfuegbar: false },
+        { id: 'Laufen', label: 'Laufen', verfuegbar: true },
         { id: 'Rad', label: 'Rad', verfuegbar: false },
         { id: 'Schwimmen', label: 'Schwimmen', verfuegbar: false }
     ];
@@ -48,6 +48,41 @@
             y: hoehe - ((e.gewicht - min) / range) * hoehe,
             ...e
         }));
+    }
+
+    /**
+     * Generischer Linien-Chart: nimmt beliebige Werte-Liste und erzeugt SVG-Path + Punkte.
+     * Funktioniert für Pace, Distanz, HR – nicht nur Gewicht.
+     *
+     * @param {Array<{wert: number, datum: string, label?: string}>} datenpunkte
+     * @param {number} breite
+     * @param {number} hoehe
+     * @param {boolean} [invertiert=false] — wenn true: kleinere Werte oben (für Pace, wo niedriger=besser)
+     */
+    function genericChart(datenpunkte, breite, hoehe, invertiert = false) {
+        if (datenpunkte.length === 0) return { path: '', punkte: [] };
+
+        const werte = datenpunkte.map(d => d.wert);
+        const min = Math.min(...werte);
+        const max = Math.max(...werte);
+        const range = max - min || 1;
+
+        const xStep = datenpunkte.length === 1 ? breite / 2 : breite / (datenpunkte.length - 1);
+
+        const punkte = datenpunkte.map((d, i) => {
+            const x = datenpunkte.length === 1 ? breite / 2 : i * xStep;
+            const ratio = (d.wert - min) / range;
+            // Wenn invertiert: kleinere Werte oben (Pace: niedriger = schneller = besser)
+            const yRatio = invertiert ? ratio : 1 - ratio;
+            const y = yRatio * hoehe;
+            return { x, y, ...d };
+        });
+
+        const path = punkte.map((p, i) =>
+            `${i === 0 ? 'M' : 'L'} ${p.x.toFixed(1)} ${p.y.toFixed(1)}`
+        ).join(' ');
+
+        return { path, punkte, min, max };
     }
 
     /**
@@ -483,13 +518,161 @@
                     </div>
                 {/if}
             </section>
+        {:else if sportFilter === 'Laufen'}
+            <!-- Lauf-Fortschritt: Records + Pace/Distanz/HR-Verläufe -->
+            {#if !laufFortschritt}
+                <div class="chart-card empty-fortschritt">
+                    <span class="empty-icon">🏃</span>
+                    <p>Noch keine Lauf-Daten</p>
+                    <p class="sub">
+                        Logge eine Laufsession mit Distanz, dann erscheinen hier deine Pace-, Distanz- und HR-Verläufe.
+                    </p>
+                </div>
+            {:else}
+                <!-- Lauf-spezifische Personal Records -->
+                <section class="chart-section">
+                    <div class="section-header">
+                        <h2>Lauf-Records</h2>
+                        <span class="section-sub">{laufFortschritt.anzahl} Sessions mit Distanz</span>
+                    </div>
+
+                    <div class="records-grid lauf-records">
+                        {#if laufFortschritt.records.laengsteDistanz}
+                            <div class="record-card">
+                                <span class="record-label">Längste Distanz</span>
+                                <span class="record-wert">{laufFortschritt.records.laengsteDistanz.distanz} km</span>
+                                <span class="record-meta">{formatKurzes(laufFortschritt.records.laengsteDistanz.datum)}</span>
+                            </div>
+                        {/if}
+                        {#if laufFortschritt.records.schnellstePace}
+                            <div class="record-card">
+                                <span class="record-label">Schnellste Pace</span>
+                                <span class="record-wert">{laufFortschritt.records.schnellstePace.formatted}</span>
+                                <span class="record-meta">
+                                    {laufFortschritt.records.schnellstePace.distanz}km · {formatKurzes(laufFortschritt.records.schnellstePace.datum)}
+                                </span>
+                            </div>
+                        {/if}
+                        {#if laufFortschritt.records.hoechsteHr}
+                            <div class="record-card">
+                                <span class="record-label">Höchste Ø HR</span>
+                                <span class="record-wert">{laufFortschritt.records.hoechsteHr.bpm} <span class="rec-einh">bpm</span></span>
+                                <span class="record-meta">{formatKurzes(laufFortschritt.records.hoechsteHr.datum)}</span>
+                            </div>
+                        {/if}
+                        {#if laufFortschritt.records.meisteHm}
+                            <div class="record-card">
+                                <span class="record-label">Meiste Höhenmeter</span>
+                                <span class="record-wert">{laufFortschritt.records.meisteHm.meter} <span class="rec-einh">m</span></span>
+                                <span class="record-meta">{formatKurzes(laufFortschritt.records.meisteHm.datum)}</span>
+                            </div>
+                        {/if}
+                    </div>
+                </section>
+
+                <!-- Pace-Verlauf-Chart (invertiert: niedrigere Pace = schneller = besser = oben) -->
+                {#if laufFortschritt.verlauf.length >= 2}
+                    {@const paceDaten = laufFortschritt.verlauf
+                        .filter(v => v.paceSekunden !== null)
+                        .map(v => ({ wert: v.paceSekunden, datum: v.datum, paceFormatted: v.paceFormatted, distanz: v.distanz }))}
+                    {@const paceChart = genericChart(paceDaten, 280, 100, true)}
+
+                    {#if paceDaten.length >= 2}
+                        <section class="chart-section">
+                            <div class="section-header">
+                                <h2>Pace-Verlauf</h2>
+                                <span class="section-sub">niedriger = schneller</span>
+                            </div>
+
+                            <div class="chart-card">
+                                <svg viewBox="-10 -10 300 130" preserveAspectRatio="xMidYMid meet"
+                                    width="100%" height="auto" class="linien-chart">
+                                    <path d={`${paceChart.path} L 280 100 L 0 100 Z`}
+                                        fill="var(--accent)" opacity="0.08" />
+                                    <path d={paceChart.path}
+                                        fill="none" stroke="var(--accent)"
+                                        stroke-width="2" stroke-linecap="round"
+                                        stroke-linejoin="round" />
+                                    {#each paceChart.punkte as p}
+                                        <circle cx={p.x} cy={p.y} r="3.5" fill="var(--accent)" />
+                                        <circle cx={p.x} cy={p.y} r="1.5" fill="#0a0e14" />
+                                    {/each}
+                                </svg>
+                                <div class="chart-legende">
+                                    <span>{paceDaten.length} Sessions · Schnellste {laufFortschritt.records.schnellstePace?.formatted ?? '—'}</span>
+                                </div>
+                            </div>
+                        </section>
+                    {/if}
+
+                    <!-- Distanz-Verlauf-Chart -->
+                    {@const distanzDaten = laufFortschritt.verlauf.map(v => ({
+                        wert: v.distanz, datum: v.datum
+                    }))}
+                    {@const distanzChart = genericChart(distanzDaten, 280, 100, false)}
+
+                    <section class="chart-section">
+                        <div class="section-header">
+                            <h2>Distanz-Verlauf</h2>
+                            <span class="section-sub">Total {distanzDaten.reduce((sum, d) => sum + d.wert, 0).toFixed(1)} km</span>
+                        </div>
+
+                        <div class="chart-card">
+                            <svg viewBox="-10 -10 300 130" preserveAspectRatio="xMidYMid meet"
+                                width="100%" height="auto" class="linien-chart">
+                                <path d={`${distanzChart.path} L 280 100 L 0 100 Z`}
+                                    fill="var(--sport-laufen)" opacity="0.08" />
+                                <path d={distanzChart.path}
+                                    fill="none" stroke="var(--sport-laufen)"
+                                    stroke-width="2" stroke-linecap="round"
+                                    stroke-linejoin="round" />
+                                {#each distanzChart.punkte as p}
+                                    <circle cx={p.x} cy={p.y} r="3.5" fill="var(--sport-laufen)" />
+                                    <circle cx={p.x} cy={p.y} r="1.5" fill="#0a0e14" />
+                                {/each}
+                            </svg>
+                        </div>
+                    </section>
+                {/if}
+
+                <!-- Letzte Lauf-Sessions als Liste -->
+                <section class="chart-section">
+                    <div class="section-header">
+                        <h2>Sessions im Detail</h2>
+                        <span class="section-sub">jüngste zuerst</span>
+                    </div>
+
+                    <div class="lauf-sessions-liste">
+                        {#each laufFortschritt.verlauf.slice().reverse() as v (v._id)}
+                            <a href="/log/{v._id}" class="lauf-session-zeile">
+                                <div class="lsz-haupt">
+                                    <span class="lsz-distanz">{v.distanz} km</span>
+                                    {#if v.paceFormatted}
+                                        <span class="lsz-pace">{v.paceFormatted} min/km</span>
+                                    {/if}
+                                </div>
+                                <div class="lsz-meta">
+                                    <span>{formatKurzes(v.datum)}</span>
+                                    <span>·</span>
+                                    <span>{v.dauer} min</span>
+                                    {#if v.avgHr}
+                                        <span>·</span>
+                                        <span>{v.avgHr} bpm</span>
+                                    {/if}
+                                </div>
+                            </a>
+                        {/each}
+                    </div>
+                </section>
+            {/if}
+
         {:else}
             <!-- Empty-State für Sportarten ohne Tracking -->
             <div class="chart-card empty-fortschritt">
                 <span class="empty-icon">📈</span>
                 <p>Bald verfügbar</p>
                 <p class="sub">
-                    Pace und Distanz für {sportFilter} kommen, wenn das Datenmodell erweitert ist.
+                    Distanz/Pace-Tracking für {sportFilter} kommt in einer späteren Iteration.
                 </p>
             </div>
         {/if}
@@ -1015,6 +1198,68 @@
     .fie-werte strong {
         color: var(--text-primary);
         font-weight: 700;
+    }
+
+    /* Lauf-Records: 2x2 Grid */
+    .lauf-records {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .rec-einh {
+        font-size: 0.85rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    /* Lauf-Sessions-Liste im Fortschritt */
+    .lauf-sessions-liste {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .lauf-session-zeile {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 0.85rem 1rem;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.15s;
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+    }
+
+    .lauf-session-zeile:hover {
+        background: var(--bg-elevated);
+        border-color: var(--border-strong);
+        transform: translateX(2px);
+    }
+
+    .lsz-haupt {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+    }
+
+    .lsz-distanz {
+        font-size: 1.05rem;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+
+    .lsz-pace {
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    .lsz-meta {
+        display: flex;
+        gap: 0.4rem;
+        font-size: 0.78rem;
+        color: var(--text-tertiary);
     }
 
     /* Personal Records */

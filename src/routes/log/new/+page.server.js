@@ -49,6 +49,11 @@ export const actions = {
         const notiz = data.get('notiz');
         const uebungenJson = String(data.get('uebungen') ?? '[]');
 
+        // Lauf-/Rad-spezifische Felder (alle optional, auch nur bei diesen Sportarten erfasst)
+        const distanzRaw = data.get('distanz');
+        const avgHrRaw = data.get('avgHr');
+        const hoehenmeterRaw = data.get('hoehenmeter');
+
         if (!sport || !datum || !dauer || !rpe) {
             return fail(400, { error: 'Bitte alle Pflichtfelder ausfüllen.' });
         }
@@ -60,8 +65,16 @@ export const actions = {
             return fail(400, { error: 'Das Datum darf nicht in der Zukunft liegen.' });
         }
 
+        // Lauf-Felder parsen — leerer String / NaN → undefined (Schema lässt's weg)
+        const distanz = distanzRaw && Number.isFinite(Number(distanzRaw)) ? Number(distanzRaw) : undefined;
+        const avgHr = avgHrRaw && Number.isFinite(Number(avgHrRaw)) ? Number(avgHrRaw) : undefined;
+        const hoehenmeter = hoehenmeterRaw && Number.isFinite(Number(hoehenmeterRaw)) ? Number(hoehenmeterRaw) : undefined;
+
         await connectDB();
-        const session = await Session.create({ sport, subtyp, datum, dauer, rpe, notiz });
+        const session = await Session.create({
+            sport, subtyp, datum, dauer, rpe, notiz,
+            distanz, avgHr, hoehenmeter
+        });
 
         // Übungen mitspeichern (nur bei Kraft, nur falls vorhanden)
         // Fehler beim Übungs-Insert sind nicht kritisch — Session ist bereits gespeichert
