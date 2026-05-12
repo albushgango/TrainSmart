@@ -472,6 +472,30 @@ Die folgenden Erweiterungen wurden über den Mindestumfang der Übungen ab SW8 h
     - [`src/routes/+layout.svelte`](src/routes/+layout.svelte) (URL-Parameter-Auslöser nach Form-Action-Redirects)
 - **Aus Evaluation abgeleitet?:** Nein
 
+### 4.14 Garmin TCX-Import mit erweiterten Lauf-Analysen
+
+- **Beschreibung & Nutzen:** Komplette Lauf-Activity aus Garmin Connect ohne manuelles Tippen importieren. User exportiert die TCX-Datei aus Garmin Connect (3 Klicks), lädt sie unter `/log/import` hoch. App parsed die Datei, zeigt eine Vorschau mit allen extrahierten Werten, User ergänzt nur RPE / Subtyp / Notiz und klickt "Importieren". Detail-Seite zeigt anschliessend zusätzlich zur normalen Session-Anzeige eine **km-Splits-Tabelle** (Pace pro km als Balken-Visualisierung), einen **HR-Verlaufs-Chart**, einen **Pace-Verlaufs-Chart** (invertiert: unten = schneller) und ein **Höhenprofil**.
+
+    Extrahierte Felder (direkt aus TCX-Activity-Summary):
+    - Sport (Mapping `Running` → `Laufen`, `Biking` → `Rad`, `Swimming` → `Schwimmen`)
+    - Datum, Dauer, Distanz, Ø HR, Max HR, Kalorien
+
+    Aggregierte Felder (aus Trackpoints):
+    - Höhenmeter (kumulative positive Anstiege)
+    - Ø Schrittfrequenz (Cadence), Ø Watts (Power)
+    - km-Splits mit Pace und avg HR pro km
+    - Reduzierter Verlauf (max. 80 gleichmässig gesamplete Punkte) mit Distanz, HR, Pace, Höhe
+
+- **Wo umgesetzt:**
+    - Parser: [`src/lib/server/tcxParser.js`](src/lib/server/tcxParser.js) — XML-Parsing mit `fast-xml-parser`, Sport-Mapping, Trackpoint-Aggregation, Splits-Berechnung, Verlaufs-Reduktion
+    - Schema: [`src/lib/server/models/session.js`](src/lib/server/models/session.js) — Sub-Schemas `splitSchema`, `verlaufPunktSchema`, `laufDatenSchema` + neue Felder `maxHr`, `calories`, `avgCadence`, `avgWatts`
+    - Route: [`src/routes/log/import/+page.svelte`](src/routes/log/import/+page.svelte) — 2-Step-Flow (Upload → Vorschau mit RPE-Eingabe → Save)
+    - Server-Actions: [`src/routes/log/import/+page.server.js`](src/routes/log/import/+page.server.js) — `parsen` (Datei → JSON) und `speichern` (JSON → DB)
+    - Detail-Anzeige: [`src/routes/log/[id]/+page.svelte`](src/routes/log/[id]/+page.svelte) — Splits-Tabelle und 3 SVG-Charts (HR, Pace, Höhenprofil)
+    - Import-Button: [`src/routes/log/+page.svelte`](src/routes/log/+page.svelte) — Pfeil-Hoch-Icon im Header
+- **Referenz:** Test-Datei `activity_22807229628.tcx` (Garmin Forerunner 265 Export)
+- **Aus Evaluation abgeleitet?:** Nein, eigene Initiative für besseres Lauf-Tracking ohne manuelles Eintippen
+
 ### 4.13 Lauf-spezifisches Tracking mit Pace-Verlauf
 
 - **Beschreibung & Nutzen:** Bei Sport=Laufen werden im Loggen-Form drei zusätzliche Felder angezeigt: **Distanz** (km), **avg HR** (bpm – passt zur Garmin-HRM-600 des Entwicklers), **Höhenmeter** (m). Pace und Geschwindigkeit werden live während der Eingabe berechnet (z.B. "5:30 min/km · 10.9 km/h"). Im Stats-Fortschritt-Tab gibt es einen eigenen Lauf-Bereich mit vier Lauf-spezifischen Personal Records (Längste Distanz, Schnellste Pace, Höchste Ø HR, Meiste Höhenmeter), einem Pace-Verlaufs-Chart (invertierte Y-Achse: niedriger = schneller) und einem Distanz-Verlaufs-Chart über alle gespeicherten Lauf-Sessions. Lauf-Cards in der Sessions-Liste zeigen Distanz prominent statt nur Dauer.

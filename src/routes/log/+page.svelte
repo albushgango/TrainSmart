@@ -36,6 +36,8 @@
             </p>
         </div>
         <div class="header-aktionen">
+            <a href="/log/import" class="btn-export" aria-label="Garmin TCX importieren"
+                title="Garmin TCX importieren">⇪</a>
             {#if sessions.length > 0}
                 <a href="/export" class="btn-export" aria-label="Als CSV exportieren"
                     title="Als CSV exportieren">⤓</a>

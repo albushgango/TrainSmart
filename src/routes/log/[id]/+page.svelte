@@ -178,6 +178,30 @@
                         <span class="wert">{session.avgHr} bpm</span>
                     </div>
                 {/if}
+                {#if session.maxHr}
+                    <div class="info-zeile">
+                        <span class="label">Max Herzfrequenz</span>
+                        <span class="wert">{session.maxHr} bpm</span>
+                    </div>
+                {/if}
+                {#if session.calories}
+                    <div class="info-zeile">
+                        <span class="label">Kalorien</span>
+                        <span class="wert">{session.calories} kcal</span>
+                    </div>
+                {/if}
+                {#if session.avgCadence}
+                    <div class="info-zeile">
+                        <span class="label">Ø Schrittfrequenz</span>
+                        <span class="wert">{session.avgCadence} spm</span>
+                    </div>
+                {/if}
+                {#if session.avgWatts}
+                    <div class="info-zeile">
+                        <span class="label">Ø Watts</span>
+                        <span class="wert">{session.avgWatts} W</span>
+                    </div>
+                {/if}
                 {#if session.hoehenmeter}
                     <div class="info-zeile">
                         <span class="label">Höhenmeter</span>
@@ -202,6 +226,131 @@
                 🗑 Löschen
             </button>
         </div>
+
+        <!-- Lauf-Analyse-Sektion: Splits + Charts (nur bei vorhandenen laufDaten aus TCX-Import) -->
+        {#if session.laufDaten && session.laufDaten.verlauf && session.laufDaten.verlauf.length > 0}
+            {@const v = session.laufDaten.verlauf}
+            {@const splits = session.laufDaten.splits}
+            {@const chartB = 280}
+            {@const chartH = 90}
+
+            <!-- Splits-Tabelle -->
+            {#if splits && splits.length > 0}
+                {@const langsamstePace = Math.max(...splits.map(s => s.dauerSek))}
+                {@const schnellstePace = Math.min(...splits.map(s => s.dauerSek))}
+
+                <section class="lauf-analyse">
+                    <div class="la-header">
+                        <h2>Splits</h2>
+                        <span class="la-sub">{splits.length} km</span>
+                    </div>
+
+                    <div class="splits-tabelle">
+                        {#each splits as split}
+                            {@const pct = ((langsamstePace - split.dauerSek) / (langsamstePace - schnellstePace || 1)) * 100}
+                            <div class="split-zeile">
+                                <span class="split-km">km {split.km}</span>
+                                <div class="split-balken-container">
+                                    <div class="split-balken" style="width: {Math.max(15, pct)}%"></div>
+                                </div>
+                                <span class="split-pace">{split.paceFormatted}</span>
+                                {#if split.avgHr}
+                                    <span class="split-hr">{split.avgHr}♥</span>
+                                {/if}
+                            </div>
+                        {/each}
+                    </div>
+                </section>
+            {/if}
+
+            <!-- HR-Verlauf-Chart -->
+            {@const hrDaten = v.filter(p => Number.isFinite(p.hr))}
+            {#if hrDaten.length >= 2}
+                {@const hrMin = Math.min(...hrDaten.map(p => p.hr))}
+                {@const hrMax = Math.max(...hrDaten.map(p => p.hr))}
+                {@const hrRange = hrMax - hrMin || 1}
+                {@const hrPath = hrDaten.map((p, i) => {
+                    const x = (i / (hrDaten.length - 1)) * chartB;
+                    const y = chartH - ((p.hr - hrMin) / hrRange) * chartH;
+                    return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                }).join(' ')}
+
+                <section class="lauf-analyse">
+                    <div class="la-header">
+                        <h2>Herzfrequenz</h2>
+                        <span class="la-sub">{hrMin}–{hrMax} bpm</span>
+                    </div>
+
+                    <svg viewBox="-10 -10 300 120" preserveAspectRatio="xMidYMid meet"
+                        width="100%" class="lauf-chart">
+                        <path d={`${hrPath} L ${chartB} ${chartH} L 0 ${chartH} Z`}
+                            fill="var(--sport-kraft)" opacity="0.1" />
+                        <path d={hrPath}
+                            fill="none" stroke="var(--sport-kraft)"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </section>
+            {/if}
+
+            <!-- Pace-Verlauf-Chart (invertiert: schneller = höher) -->
+            {@const paceDaten = v.filter(p => Number.isFinite(p.pace) && p.pace > 0)}
+            {#if paceDaten.length >= 2}
+                {@const paceMin = Math.min(...paceDaten.map(p => p.pace))}
+                {@const paceMax = Math.max(...paceDaten.map(p => p.pace))}
+                {@const paceRange = paceMax - paceMin || 1}
+                {@const pacePath = paceDaten.map((p, i) => {
+                    const x = (i / (paceDaten.length - 1)) * chartB;
+                    // Invertiert: höhere Pace (langsam) = oben, niedrige Pace (schnell) = unten
+                    const y = ((p.pace - paceMin) / paceRange) * chartH;
+                    return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                }).join(' ')}
+
+                <section class="lauf-analyse">
+                    <div class="la-header">
+                        <h2>Pace-Verlauf</h2>
+                        <span class="la-sub">unten = schneller</span>
+                    </div>
+
+                    <svg viewBox="-10 -10 300 120" preserveAspectRatio="xMidYMid meet"
+                        width="100%" class="lauf-chart">
+                        <path d={`${pacePath} L ${chartB} ${chartH} L 0 ${chartH} Z`}
+                            fill="var(--accent)" opacity="0.1" />
+                        <path d={pacePath}
+                            fill="none" stroke="var(--accent)"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </section>
+            {/if}
+
+            <!-- Höhenprofil -->
+            {@const hoeheDaten = v.filter(p => Number.isFinite(p.hoehe))}
+            {#if hoeheDaten.length >= 2}
+                {@const hMin = Math.min(...hoeheDaten.map(p => p.hoehe))}
+                {@const hMax = Math.max(...hoeheDaten.map(p => p.hoehe))}
+                {@const hRange = hMax - hMin || 1}
+                {@const hPath = hoeheDaten.map((p, i) => {
+                    const x = (i / (hoeheDaten.length - 1)) * chartB;
+                    const y = chartH - ((p.hoehe - hMin) / hRange) * chartH;
+                    return `${i === 0 ? 'M' : 'L'} ${x.toFixed(1)} ${y.toFixed(1)}`;
+                }).join(' ')}
+
+                <section class="lauf-analyse">
+                    <div class="la-header">
+                        <h2>Höhenprofil</h2>
+                        <span class="la-sub">{Math.round(hMin)}–{Math.round(hMax)} m</span>
+                    </div>
+
+                    <svg viewBox="-10 -10 300 120" preserveAspectRatio="xMidYMid meet"
+                        width="100%" class="lauf-chart">
+                        <path d={`${hPath} L ${chartB} ${chartH} L 0 ${chartH} Z`}
+                            fill="var(--sport-rad)" opacity="0.18" />
+                        <path d={hPath}
+                            fill="none" stroke="var(--sport-rad)"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </section>
+            {/if}
+        {/if}
 
         <!-- Übungen-Sektion: nur bei Kraft -->
         {#if session.sport === 'Kraft'}
@@ -1232,6 +1381,89 @@
         background: var(--bg-card);
         color: var(--accent);
         border-color: var(--accent);
+    }
+
+    /* ─── Lauf-Analyse: Splits + Charts ─── */
+    .lauf-analyse {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.1rem;
+        margin-top: 1rem;
+    }
+
+    .la-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 0.85rem;
+    }
+
+    .la-header h2 {
+        margin: 0;
+        font-size: 1rem;
+        font-weight: 700;
+        letter-spacing: -0.015em;
+        color: var(--text-primary);
+    }
+
+    .la-sub {
+        font-size: 0.72rem;
+        color: var(--text-tertiary);
+        font-weight: 500;
+    }
+
+    /* Splits-Tabelle: jede km eine Zeile mit Balken */
+    .splits-tabelle {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .split-zeile {
+        display: grid;
+        grid-template-columns: 50px 1fr 70px 50px;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+    }
+
+    .split-km {
+        font-weight: 700;
+        color: var(--text-tertiary);
+        font-size: 0.78rem;
+    }
+
+    .split-balken-container {
+        background: var(--bg-input);
+        border-radius: 999px;
+        height: 8px;
+        overflow: hidden;
+    }
+
+    .split-balken {
+        background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+        height: 100%;
+        border-radius: 999px;
+        box-shadow: 0 0 8px var(--accent-glow);
+        transition: width 0.3s ease-out;
+    }
+
+    .split-pace {
+        font-weight: 700;
+        color: var(--text-primary);
+        text-align: right;
+    }
+
+    .split-hr {
+        font-size: 0.78rem;
+        color: var(--sport-kraft);
+        font-weight: 600;
+        text-align: right;
+    }
+
+    .lauf-chart {
+        display: block;
     }
 
     /* ─── Lauf-/Rad-Edit-Felder ─── */
