@@ -29,6 +29,18 @@ const hrZoneSchema = new mongoose.Schema({
     prozent: Number
 }, { _id: false });
 
+// Sub-Schema: automatisch erkannte schnelle Abschnitte aus dem Pace-Verlauf
+const intervallSchema = new mongoose.Schema({
+    nr: Number,
+    startSek: Number,
+    endeSek: Number,
+    dauerSek: Number,
+    distanz: Number,
+    paceSek: Number,
+    paceFormatted: String,
+    avgHr: Number
+}, { _id: false });
+
 // Sub-Schema: erweiterte Lauf-Daten aus TCX-Import
 const laufDatenSchema = new mongoose.Schema({
     splits: [splitSchema],
@@ -37,7 +49,8 @@ const laufDatenSchema = new mongoose.Schema({
         maxHr: Number,
         totalSekunden: Number,
         zonen: [hrZoneSchema]
-    }
+    },
+    intervalle: [intervallSchema]
 }, { _id: false });
 
 const sessionSchema = new mongoose.Schema({

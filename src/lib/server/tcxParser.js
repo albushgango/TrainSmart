@@ -1,5 +1,6 @@
 import { XMLParser } from 'fast-xml-parser';
 import { berechneHrZonenAusPunkten } from '$lib/hrZonen.js';
+import { berechneIntervalleAusPunkten } from '$lib/intervalle.js';
 
 /**
  * Parser für Garmin-TCX-Dateien (Training Center XML).
@@ -244,6 +245,9 @@ export function parseTCX(xmlString, optionen = {}) {
     const splits = berechneSplits(alleTrackpoints);
     const verlauf = reduziereVerlauf(alleTrackpoints);
     const hrZonen = berechneHrZonenAusPunkten(alleTrackpoints, optionen.maxHr);
+    const intervalAnalyse = sport === 'Laufen'
+        ? berechneIntervalleAusPunkten(alleTrackpoints)
+        : { intervalle: [] };
 
     return {
         // Direkt für Session
@@ -263,7 +267,8 @@ export function parseTCX(xmlString, optionen = {}) {
         laufDaten: {
             splits,
             verlauf,
-            hrZonen
+            hrZonen,
+            intervalle: intervalAnalyse.intervalle
         },
 
         // Meta

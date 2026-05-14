@@ -6,6 +6,7 @@
     import { filtereUebungen, SUBTYP_GRUPPEN } from '$lib/uebungen.js';
     import { paceProKm, geschwindigkeitKmh } from '$lib/lauf.js';
     import { berechneHrZonenAusPunkten, formatZonenZeit } from '$lib/hrZonen.js';
+    import { berechneIntervalleAusPunkten, formatDauer } from '$lib/intervalle.js';
 
     let { data, form } = $props();
 
@@ -62,6 +63,11 @@
         const gespeichert = session.laufDaten?.hrZonen;
         if (gespeichert?.zonen?.length) return gespeichert;
         return berechneHrZonenAusPunkten(session.laufDaten?.verlauf ?? [], data.profil?.maxHr);
+    });
+    let intervallAnalyse = $derived.by(() => {
+        const gespeichert = session.laufDaten?.intervalle;
+        if (gespeichert?.length) return { intervalle: gespeichert };
+        return berechneIntervalleAusPunkten(session.laufDaten?.verlauf ?? []);
     });
 
     // Subtypen ableiten (Kraft hat aktive Split-Tage, andere Sportarten nur Standard)
@@ -322,6 +328,43 @@
                 </section>
             {/if}
 
+            <!-- Automatisch erkannte Intervalle -->
+            {#if intervallAnalyse}
+                <section class="lauf-analyse intervall-card">
+                    <div class="la-header">
+                        <h2>Intervalle</h2>
+                        <span class="la-sub">
+                            {intervallAnalyse.intervalle.length > 0
+                                ? `${intervallAnalyse.intervalle.length} schnelle Abschnitte`
+                                : 'keine klaren Abschnitte'}
+                        </span>
+                    </div>
+
+                    {#if intervallAnalyse.intervalle.length > 0}
+                        <div class="intervall-liste">
+                            {#each intervallAnalyse.intervalle as intervall}
+                                <div class="intervall-zeile">
+                                    <span class="intervall-nr">#{intervall.nr}</span>
+                                    <div class="intervall-haupt">
+                                        <span class="intervall-pace">{intervall.paceFormatted} min/km</span>
+                                        <span class="intervall-meta">
+                                            {formatDauer(intervall.dauerSek)} · {intervall.distanz.toFixed(2)} km
+                                            {#if intervall.avgHr}
+                                                · Ø {intervall.avgHr} bpm
+                                            {/if}
+                                        </span>
+                                    </div>
+                                </div>
+                            {/each}
+                        </div>
+                    {:else}
+                        <p class="intervall-empty">
+                            Dieser Lauf wirkt gleichmässig oder die GPS-Daten sind zu grob für eine sichere Intervall-Erkennung.
+                        </p>
+                    {/if}
+                </section>
+            {/if}
+
             <!-- HR-Zonen -->
             {#if hrZonenAnalyse && hrZonenAnalyse.totalSekunden > 0}
                 <section class="lauf-analyse hr-zonen-card">
@@ -390,6 +433,7 @@
                 {@const paceMin = Math.min(...paceDaten.map(p => p.pace))}
                 {@const paceMax = Math.max(...paceDaten.map(p => p.pace))}
                 {@const paceRange = paceMax - paceMin || 1}
+                {@const maxSekunden = Math.max(...paceDaten.map(p => p.sekunden ?? 0), 1)}
                 {@const pacePath = paceDaten.map((p, i) => {
                     const x = (i / (paceDaten.length - 1)) * chartB;
                     // Invertiert: höhere Pace (langsam) = oben, niedrige Pace (schnell) = unten
@@ -405,6 +449,12 @@
 
                     <svg viewBox="-10 -10 300 120" preserveAspectRatio="xMidYMid meet"
                         width="100%" class="lauf-chart">
+                        {#each intervallAnalyse.intervalle as intervall}
+                            {@const startX = Math.max(0, (intervall.startSek / maxSekunden) * chartB)}
+                            {@const endeX = Math.min(chartB, (intervall.endeSek / maxSekunden) * chartB)}
+                            <rect x={startX} y="0" width={Math.max(2, endeX - startX)} height={chartH}
+                                rx="4" fill="var(--accent)" opacity="0.12" />
+                        {/each}
                         <path d={`${pacePath} L ${chartB} ${chartH} L 0 ${chartH} Z`}
                             fill="var(--accent)" opacity="0.1" />
                         <path d={pacePath}
@@ -1598,6 +1648,60 @@
         color: var(--sport-kraft);
         font-weight: 600;
         text-align: right;
+    }
+
+    .intervall-card {
+        border-color: rgba(132, 204, 22, 0.24);
+    }
+
+    .intervall-liste {
+        display: flex;
+        flex-direction: column;
+        gap: 0.55rem;
+    }
+
+    .intervall-zeile {
+        display: grid;
+        grid-template-columns: 42px 1fr;
+        gap: 0.75rem;
+        align-items: center;
+        background: var(--bg-input);
+        border: 1px solid rgba(240, 246, 252, 0.06);
+        border-radius: var(--radius-sm);
+        padding: 0.75rem;
+    }
+
+    .intervall-nr {
+        color: var(--accent);
+        font-size: 0.82rem;
+        font-weight: 900;
+    }
+
+    .intervall-haupt {
+        display: flex;
+        flex-direction: column;
+        gap: 0.15rem;
+        min-width: 0;
+    }
+
+    .intervall-pace {
+        color: var(--text-primary);
+        font-size: 0.96rem;
+        font-weight: 800;
+    }
+
+    .intervall-meta {
+        color: var(--text-tertiary);
+        font-size: 0.76rem;
+        font-weight: 600;
+        line-height: 1.35;
+    }
+
+    .intervall-empty {
+        margin: 0;
+        color: var(--text-tertiary);
+        font-size: 0.86rem;
+        line-height: 1.5;
     }
 
     .hr-zonen-card {
