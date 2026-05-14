@@ -85,6 +85,31 @@
         });
     }
 
+    function formatPaceSekunden(sekunden) {
+        if (!Number.isFinite(sekunden) || sekunden <= 0) return '-';
+        const minuten = Math.floor(sekunden / 60);
+        const rest = Math.round(sekunden % 60).toString().padStart(2, '0');
+        return `${minuten}:${rest}`;
+    }
+
+    function splitFazit(splits) {
+        if (!splits || splits.length < 2) {
+            return { titel: 'Laufprofil', text: 'Mehr Splits machen die Analyse aussagekräftiger.' };
+        }
+
+        const erster = splits[0].dauerSek;
+        const letzter = splits[splits.length - 1].dauerSek;
+        const unterschied = erster - letzter;
+
+        if (unterschied > 8) {
+            return { titel: 'Negativer Split', text: `Du wurdest zum Ende ca. ${Math.round(unterschied)}s/km schneller.` };
+        }
+        if (unterschied < -8) {
+            return { titel: 'Schneller Start', text: `Du bist ca. ${Math.abs(Math.round(unterschied))}s/km langsamer geworden.` };
+        }
+        return { titel: 'Konstanter Lauf', text: 'Deine Pace blieb über den Lauf hinweg stabil.' };
+    }
+
     function bearbeitenAbbrechen() {
         sport = session.sport;
         datum = session.datum.split('T')[0];
@@ -234,6 +259,34 @@
             {@const chartB = 280}
             {@const chartH = 90}
 
+            {#if splits && splits.length > 0}
+                {@const besterSplit = splits.reduce((best, split) => split.dauerSek < best.dauerSek ? split : best, splits[0])}
+                {@const fazit = splitFazit(splits)}
+                <section class="lauf-analyse lauf-fazit">
+                    <div class="la-header">
+                        <h2>Lauf-Fazit</h2>
+                        <span class="la-sub">aus Garmin-Daten</span>
+                    </div>
+
+                    <div class="fazit-grid">
+                        <div class="fazit-item fazit-haupt">
+                            <span class="fazit-label">{fazit.titel}</span>
+                            <span class="fazit-text">{fazit.text}</span>
+                        </div>
+                        <div class="fazit-item">
+                            <span class="fazit-label">Bester km</span>
+                            <span class="fazit-wert">km {besterSplit.km} · {besterSplit.paceFormatted}</span>
+                        </div>
+                        {#if session.avgWatts}
+                            <div class="fazit-item">
+                                <span class="fazit-label">Ø Power</span>
+                                <span class="fazit-wert">{session.avgWatts} W</span>
+                            </div>
+                        {/if}
+                    </div>
+                </section>
+            {/if}
+
             <!-- Splits-Tabelle -->
             {#if splits && splits.length > 0}
                 {@const langsamstePace = Math.max(...splits.map(s => s.dauerSek))}
@@ -278,7 +331,7 @@
                 <section class="lauf-analyse">
                     <div class="la-header">
                         <h2>Herzfrequenz</h2>
-                        <span class="la-sub">{hrMin}–{hrMax} bpm</span>
+                        <span class="la-sub">Ø {session.avgHr ?? '-'} bpm · {hrMin}–{hrMax} bpm</span>
                     </div>
 
                     <svg viewBox="-10 -10 300 120" preserveAspectRatio="xMidYMid meet"
@@ -308,7 +361,7 @@
                 <section class="lauf-analyse">
                     <div class="la-header">
                         <h2>Pace-Verlauf</h2>
-                        <span class="la-sub">unten = schneller</span>
+                        <span class="la-sub">{formatPaceSekunden(paceMin)}–{formatPaceSekunden(paceMax)} min/km · oben = schneller</span>
                     </div>
 
                     <svg viewBox="-10 -10 300 120" preserveAspectRatio="xMidYMid meet"
@@ -1411,6 +1464,52 @@
         font-size: 0.72rem;
         color: var(--text-tertiary);
         font-weight: 500;
+        text-align: right;
+    }
+
+    .lauf-fazit {
+        border-color: rgba(132, 204, 22, 0.28);
+        box-shadow: 0 0 22px rgba(132, 204, 22, 0.08);
+    }
+
+    .fazit-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.65rem;
+    }
+
+    .fazit-item {
+        background: var(--bg-input);
+        border: 1px solid rgba(240, 246, 252, 0.06);
+        border-radius: var(--radius-sm);
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.2rem;
+    }
+
+    .fazit-haupt {
+        grid-column: 1 / -1;
+    }
+
+    .fazit-label {
+        color: var(--accent);
+        font-size: 0.7rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+    }
+
+    .fazit-text {
+        color: var(--text-secondary);
+        font-size: 0.86rem;
+        line-height: 1.45;
+    }
+
+    .fazit-wert {
+        color: var(--text-primary);
+        font-size: 0.95rem;
+        font-weight: 800;
     }
 
     /* Splits-Tabelle: jede km eine Zeile mit Balken */

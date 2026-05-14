@@ -6,6 +6,9 @@
     let rpe = $state(5);
     let subtyp = $state('');
     let notiz = $state('');
+    let dateiInput = $state(null);
+    let dateiName = $state('');
+    let dragAktiv = $state(false);
 
     // Wenn form.geparsed da ist → Step 2 (Vorschau + Bestätigung)
     let geparsed = $derived(form?.geparsed ?? null);
@@ -24,6 +27,28 @@
             weekday: 'long', day: 'numeric', month: 'long',
             hour: '2-digit', minute: '2-digit'
         });
+    }
+
+    function dateiSetzen(file) {
+        if (!file) return;
+        dateiName = file.name;
+    }
+
+    function dateiAuswaehlen(event) {
+        dateiSetzen(event.currentTarget.files?.[0]);
+    }
+
+    function dateiAblegen(event) {
+        event.preventDefault();
+        dragAktiv = false;
+
+        const file = event.dataTransfer?.files?.[0];
+        if (!file || !dateiInput) return;
+
+        const transfer = new DataTransfer();
+        transfer.items.add(file);
+        dateiInput.files = transfer.files;
+        dateiSetzen(file);
     }
 </script>
 
@@ -53,11 +78,23 @@
         </section>
 
         <form method="POST" action="?/parsen" enctype="multipart/form-data" use:enhance>
-            <label class="upload-label">
-                <input type="file" name="datei" accept=".tcx" required />
+            <label class="upload-label"
+                class:drag-aktiv={dragAktiv}
+                ondragenter={(event) => {
+                    event.preventDefault();
+                    dragAktiv = true;
+                }}
+                ondragover={(event) => event.preventDefault()}
+                ondragleave={() => (dragAktiv = false)}
+                ondrop={dateiAblegen}>
+                <input bind:this={dateiInput} type="file" name="datei" accept=".tcx" required
+                    onchange={dateiAuswaehlen} />
                 <span class="upload-icon">⬆</span>
                 <span class="upload-text">TCX-Datei wählen</span>
                 <span class="upload-hint">oder Datei hier ablegen</span>
+                {#if dateiName}
+                    <span class="upload-datei">{dateiName}</span>
+                {/if}
             </label>
 
             <button type="submit" class="btn-save">TCX parsen</button>
@@ -215,8 +252,11 @@
         cursor: pointer; transition: all 0.15s;
     }
 
-    .upload-label:hover {
+    .upload-label:hover,
+    .upload-label.drag-aktiv {
         background: var(--bg-elevated); border-color: var(--accent);
+        box-shadow: 0 0 28px var(--accent-glow);
+        transform: translateY(-1px);
     }
 
     .upload-label input[type="file"] { display: none; }
@@ -227,6 +267,20 @@
     }
     .upload-hint {
         font-size: 0.8rem; color: var(--text-tertiary);
+    }
+
+    .upload-datei {
+        margin-top: 0.25rem;
+        padding: 0.35rem 0.65rem;
+        border-radius: 999px;
+        background: rgba(132, 204, 22, 0.12);
+        color: var(--accent);
+        font-size: 0.78rem;
+        font-weight: 700;
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
     }
 
     /* Vorschau-Card */
