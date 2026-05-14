@@ -8,6 +8,7 @@
     let gewaehlterSplit = $state(data.profil.aktiverSplit);
     let customTageText = $state(data.profil.customSplitTage.join(', '));
     let wochenziel = $state(data.profil.wochenziel);
+    let maxHr = $state(data.profil.maxHr ?? 190);
 
     // Splits als Array für #each
     const splitListe = Object.values(SPLITS);
@@ -46,6 +47,31 @@
             </div>
             <button type="submit" class="btn-primary">Speichern</button>
         </form>
+    </section>
+
+    <!-- Herzfrequenz-Zonen -->
+    <section class="card">
+        <div class="card-header">
+            <h2>Herzfrequenz-Zonen</h2>
+            <p class="card-sub">Basis für TCX-Laufanalyse: Zone 1-5 wird aus deiner maximalen Herzfrequenz berechnet.</p>
+        </div>
+
+        <form method="POST" action="?/herzfrequenzSpeichern" use:enhance class="ziel-form">
+            <div class="ziel-eingabe">
+                <input type="number" name="maxHr" bind:value={maxHr}
+                    min="120" max="230" required class="ziel-input" />
+                <span class="ziel-einheit">Max HR (bpm)</span>
+            </div>
+            <button type="submit" class="btn-primary">Speichern</button>
+        </form>
+
+        <div class="zonen-vorschau">
+            <span>Z1 bis {Math.round(maxHr * 0.6) - 1}</span>
+            <span>Z2 {Math.round(maxHr * 0.6)}-{Math.round(maxHr * 0.7) - 1}</span>
+            <span>Z3 {Math.round(maxHr * 0.7)}-{Math.round(maxHr * 0.8) - 1}</span>
+            <span>Z4 {Math.round(maxHr * 0.8)}-{Math.round(maxHr * 0.9) - 1}</span>
+            <span>Z5 ab {Math.round(maxHr * 0.9)}</span>
+        </div>
     </section>
 
     <!-- Split-Auswahl -->
@@ -204,6 +230,23 @@
         font-size: 0.85rem;
         color: var(--text-secondary);
         font-weight: 500;
+    }
+
+    .zonen-vorschau {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem;
+        margin-top: 0.85rem;
+    }
+
+    .zonen-vorschau span {
+        padding: 0.25rem 0.55rem;
+        background: var(--bg-input);
+        border: 1px solid var(--border);
+        border-radius: 999px;
+        color: var(--text-secondary);
+        font-size: 0.72rem;
+        font-weight: 600;
     }
 
     .btn-primary {

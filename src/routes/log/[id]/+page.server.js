@@ -79,7 +79,10 @@ export async function load({ params }) {
         },
         uebungen: uebungenMitVergleich,
         aktiveSplitTage,
-        uebungsVorschlaege: alleNamen
+        uebungsVorschlaege: alleNamen,
+        profil: {
+            maxHr: profil.maxHr
+        }
     };
 }
 

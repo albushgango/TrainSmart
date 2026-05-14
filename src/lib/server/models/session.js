@@ -17,10 +17,27 @@ const verlaufPunktSchema = new mongoose.Schema({
     hoehe: Number       // m
 }, { _id: false });
 
+// Sub-Schema: Zeit in Herzfrequenz-Zonen 1-5 (aus TCX-HR-Verlauf)
+const hrZoneSchema = new mongoose.Schema({
+    zone: Number,
+    name: String,
+    von: Number,
+    bis: Number,
+    cssVar: String,
+    sekunden: Number,
+    minuten: Number,
+    prozent: Number
+}, { _id: false });
+
 // Sub-Schema: erweiterte Lauf-Daten aus TCX-Import
 const laufDatenSchema = new mongoose.Schema({
     splits: [splitSchema],
-    verlauf: [verlaufPunktSchema]
+    verlauf: [verlaufPunktSchema],
+    hrZonen: {
+        maxHr: Number,
+        totalSekunden: Number,
+        zonen: [hrZoneSchema]
+    }
 }, { _id: false });
 
 const sessionSchema = new mongoose.Schema({

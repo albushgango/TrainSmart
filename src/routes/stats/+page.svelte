@@ -1,4 +1,6 @@
 <script>
+    import { formatZonenZeit } from '$lib/hrZonen.js';
+
     let { data } = $props();
     const { totals, wochenLoad, sportVerteilung, recordsProSport, uebungsFortschritt, heatmapTage, laufFortschritt } = data;
 
@@ -569,6 +571,38 @@
                         {/if}
                     </div>
                 </section>
+
+                {#if laufFortschritt.hrZonen && laufFortschritt.hrZonen.totalSekunden > 0}
+                    <section class="chart-section">
+                        <div class="section-header">
+                            <h2>HR-Zonen</h2>
+                            <span class="section-sub">alle importierten Läufe</span>
+                        </div>
+
+                        <div class="chart-card hr-zonen-summary">
+                            {#each laufFortschritt.hrZonen.zonen as zone}
+                                <div class="hr-zone-summary-row">
+                                    <div class="hr-zone-summary-top">
+                                        <span class="hr-zone-summary-name">
+                                            <span class="hr-zone-dot" style="background: var({zone.cssVar});"></span>
+                                            Z{zone.zone} · {zone.name}
+                                        </span>
+                                        <span class="hr-zone-summary-time">{formatZonenZeit(zone.sekunden)}</span>
+                                    </div>
+                                    <div class="hr-zone-summary-track">
+                                        <div class="hr-zone-summary-bar"
+                                            style="width: {Math.max(zone.sekunden > 0 ? 4 : 0, zone.prozent)}%; background: var({zone.cssVar});">
+                                        </div>
+                                    </div>
+                                    <div class="hr-zone-summary-meta">
+                                        <span>{zone.von > 0 ? `${zone.von}${zone.bis ? '-' + zone.bis : '+'}` : `bis ${zone.bis}`} bpm</span>
+                                        <span>{zone.prozent}%</span>
+                                    </div>
+                                </div>
+                            {/each}
+                        </div>
+                    </section>
+                {/if}
 
                 <!-- Pace-Verlauf-Chart (invertiert: niedrigere Pace = schneller = besser = oben) -->
                 {#if laufFortschritt.verlauf.length >= 2}
@@ -1198,6 +1232,68 @@
     .fie-werte strong {
         color: var(--text-primary);
         font-weight: 700;
+    }
+
+    .hr-zonen-summary {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .hr-zone-summary-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .hr-zone-summary-top,
+    .hr-zone-summary-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .hr-zone-summary-name {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        color: var(--text-primary);
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .hr-zone-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .hr-zone-summary-time {
+        color: var(--text-primary);
+        font-size: 0.86rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .hr-zone-summary-track {
+        height: 9px;
+        background: var(--bg-input);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .hr-zone-summary-bar {
+        height: 100%;
+        border-radius: 999px;
+        transition: width 0.25s ease-out;
+    }
+
+    .hr-zone-summary-meta {
+        color: var(--text-tertiary);
+        font-size: 0.72rem;
+        font-weight: 600;
     }
 
     /* Lauf-Records: 2x2 Grid */

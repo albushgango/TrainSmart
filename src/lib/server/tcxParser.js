@@ -1,4 +1,5 @@
 import { XMLParser } from 'fast-xml-parser';
+import { berechneHrZonenAusPunkten } from '$lib/hrZonen.js';
 
 /**
  * Parser für Garmin-TCX-Dateien (Training Center XML).
@@ -150,7 +151,7 @@ function avgFeld(trackpoints, feld) {
  * @returns {Object} Geparseten Daten mit allen Feldern
  * @throws {Error} bei ungültigem TCX
  */
-export function parseTCX(xmlString) {
+export function parseTCX(xmlString, optionen = {}) {
     const parser = new XMLParser({
         ignoreAttributes: false,
         attributeNamePrefix: '@_',
@@ -242,6 +243,7 @@ export function parseTCX(xmlString) {
     // Splits + reduzierter Verlauf
     const splits = berechneSplits(alleTrackpoints);
     const verlauf = reduziereVerlauf(alleTrackpoints);
+    const hrZonen = berechneHrZonenAusPunkten(alleTrackpoints, optionen.maxHr);
 
     return {
         // Direkt für Session
@@ -260,7 +262,8 @@ export function parseTCX(xmlString) {
         // Erweiterte Lauf-Daten
         laufDaten: {
             splits,
-            verlauf
+            verlauf,
+            hrZonen
         },
 
         // Meta

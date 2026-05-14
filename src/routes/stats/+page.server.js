@@ -2,6 +2,8 @@ import { connectDB } from '$lib/server/db.js';
 import Session from '$lib/server/models/session.js';
 import Uebung from '$lib/server/models/uebung.js';
 import { paceProKm, schnellstePace } from '$lib/lauf.js';
+import { berechneHrZonenAusPunkten, summiereHrZonen } from '$lib/hrZonen.js';
+import { holeOderErstelleProfil } from '$lib/server/models/profil.js';
 
 /** Berechnet ISO-Wochennummer für ein Datum */
 function isoWoche(datum) {
@@ -28,7 +30,10 @@ function letzteNWochen(n) {
 
 export async function load() {
     await connectDB();
-    const alleSessions = await Session.find().sort({ datum: -1 }).lean();
+    const [alleSessions, profil] = await Promise.all([
+        Session.find().sort({ datum: -1 }).lean(),
+        holeOderErstelleProfil()
+    ]);
 
     // Total-Stats
     const totalSessions = alleSessions.length;
@@ -190,6 +195,12 @@ export async function load() {
         const schnellstePaceFormat = schnellsteSession
             ? paceProKm(schnellsteSession.dauer, schnellsteSession.distanz)
             : null;
+        const hrAnalysen = laufSessions
+            .map(s => s.laufDaten?.hrZonen?.zonen?.length
+                ? s.laufDaten.hrZonen
+                : berechneHrZonenAusPunkten(s.laufDaten?.verlauf ?? [], profil.maxHr))
+            .filter(a => a.totalSekunden > 0);
+        const hrZonen = summiereHrZonen(hrAnalysen, profil.maxHr);
 
         laufFortschritt = {
             anzahl: laufSessions.length,
@@ -212,6 +223,7 @@ export async function load() {
                     datum: meisteHm.datum.toISOString()
                 } : null
             },
+            hrZonen,
             verlauf
         };
     }

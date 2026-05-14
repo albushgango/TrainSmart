@@ -114,6 +114,13 @@
         --sport-rad: #06b6d4;
         --sport-schwimmen: #3b82f6;
 
+        /* Herzfrequenz-Zonen */
+        --zone-1: #3b82f6;
+        --zone-2: #84cc16;
+        --zone-3: #facc15;
+        --zone-4: #f97316;
+        --zone-5: #ef4444;
+
         /* Empfehlungs-Farben */
         --empf-heavy: #ef4444;
         --empf-light: #f59e0b;

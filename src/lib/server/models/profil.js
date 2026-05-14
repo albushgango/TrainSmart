@@ -5,7 +5,8 @@ import mongoose from 'mongoose';
 const profilSchema = new mongoose.Schema({
     aktiverSplit: { type: String, default: 'kein' },     // ID aus SPLITS in $lib/splits.js
     customSplitTage: { type: [String], default: [] },     // bei 'custom' Split: eigene Tage
-    wochenziel: { type: Number, default: 3 }              // Anzahl Sessions/Woche (Phase D)
+    wochenziel: { type: Number, default: 3 },             // Anzahl Sessions/Woche (Phase D)
+    maxHr: { type: Number, default: 190, min: 120, max: 230 } // Basis für HR-Zonen
 }, { timestamps: true });
 
 const Profil = mongoose.models.Profil || mongoose.model('Profil', profilSchema);

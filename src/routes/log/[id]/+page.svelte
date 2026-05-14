@@ -5,6 +5,7 @@
     import { subtypenFuer } from '$lib/splits.js';
     import { filtereUebungen, SUBTYP_GRUPPEN } from '$lib/uebungen.js';
     import { paceProKm, geschwindigkeitKmh } from '$lib/lauf.js';
+    import { berechneHrZonenAusPunkten, formatZonenZeit } from '$lib/hrZonen.js';
 
     let { data, form } = $props();
 
@@ -57,6 +58,11 @@
     // Read-Modus: Pace aus gespeicherten Werten
     let sessionPace = $derived.by(() => paceProKm(session.dauer, session.distanz));
     let sessionSpeed = $derived.by(() => geschwindigkeitKmh(session.dauer, session.distanz));
+    let hrZonenAnalyse = $derived.by(() => {
+        const gespeichert = session.laufDaten?.hrZonen;
+        if (gespeichert?.zonen?.length) return gespeichert;
+        return berechneHrZonenAusPunkten(session.laufDaten?.verlauf ?? [], data.profil?.maxHr);
+    });
 
     // Subtypen ableiten (Kraft hat aktive Split-Tage, andere Sportarten nur Standard)
     let verfuegbareSubtypen = $derived(
@@ -310,6 +316,39 @@
                                 {#if split.avgHr}
                                     <span class="split-hr">{split.avgHr}♥</span>
                                 {/if}
+                            </div>
+                        {/each}
+                    </div>
+                </section>
+            {/if}
+
+            <!-- HR-Zonen -->
+            {#if hrZonenAnalyse && hrZonenAnalyse.totalSekunden > 0}
+                <section class="lauf-analyse hr-zonen-card">
+                    <div class="la-header">
+                        <h2>HR-Zonen</h2>
+                        <span class="la-sub">Basis max. {hrZonenAnalyse.maxHr} bpm</span>
+                    </div>
+
+                    <div class="hr-zonen-liste">
+                        {#each hrZonenAnalyse.zonen as zone}
+                            <div class="hr-zone-zeile">
+                                <div class="hr-zone-kopf">
+                                    <div class="hr-zone-titel">
+                                        <span class="hr-zone-badge" style="background: var({zone.cssVar});">Z{zone.zone}</span>
+                                        <span class="hr-zone-name">{zone.name}</span>
+                                    </div>
+                                    <span class="hr-zone-zeit">{formatZonenZeit(zone.sekunden)}</span>
+                                </div>
+                                <div class="hr-zone-balken-bg">
+                                    <div class="hr-zone-balken"
+                                        style="width: {Math.max(zone.sekunden > 0 ? 4 : 0, zone.prozent)}%; background: var({zone.cssVar});">
+                                    </div>
+                                </div>
+                                <div class="hr-zone-meta">
+                                    <span>{zone.von > 0 ? `${zone.von}${zone.bis ? '-' + zone.bis : '+'}` : `bis ${zone.bis}`} bpm</span>
+                                    <span>{zone.prozent}%</span>
+                                </div>
                             </div>
                         {/each}
                     </div>
@@ -1559,6 +1598,78 @@
         color: var(--sport-kraft);
         font-weight: 600;
         text-align: right;
+    }
+
+    .hr-zonen-card {
+        border-color: rgba(239, 68, 68, 0.22);
+    }
+
+    .hr-zonen-liste {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+
+    .hr-zone-zeile {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+    }
+
+    .hr-zone-kopf,
+    .hr-zone-meta {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .hr-zone-titel {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        min-width: 0;
+    }
+
+    .hr-zone-badge {
+        color: var(--bg-primary);
+        border-radius: 999px;
+        padding: 0.15rem 0.45rem;
+        font-size: 0.7rem;
+        font-weight: 900;
+    }
+
+    .hr-zone-name {
+        color: var(--text-primary);
+        font-size: 0.86rem;
+        font-weight: 700;
+    }
+
+    .hr-zone-zeit {
+        color: var(--text-primary);
+        font-size: 0.86rem;
+        font-weight: 800;
+        white-space: nowrap;
+    }
+
+    .hr-zone-balken-bg {
+        height: 9px;
+        background: var(--bg-input);
+        border-radius: 999px;
+        overflow: hidden;
+    }
+
+    .hr-zone-balken {
+        height: 100%;
+        border-radius: 999px;
+        box-shadow: 0 0 10px currentColor;
+        transition: width 0.25s ease-out;
+    }
+
+    .hr-zone-meta {
+        color: var(--text-tertiary);
+        font-size: 0.72rem;
+        font-weight: 600;
     }
 
     .lauf-chart {

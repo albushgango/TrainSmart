@@ -11,7 +11,8 @@ export async function load() {
         profil: {
             aktiverSplit: profil.aktiverSplit,
             customSplitTage: profil.customSplitTage,
-            wochenziel: profil.wochenziel
+            wochenziel: profil.wochenziel,
+            maxHr: profil.maxHr
         }
     };
 }
@@ -59,6 +60,23 @@ export const actions = {
         await connectDB();
         const profil = await holeOderErstelleProfil();
         profil.wochenziel = wochenziel;
+        await profil.save();
+
+        redirect(303, '/profil?toast=aktualisiert');
+    },
+
+    /** Speichert die maximale Herzfrequenz für HR-Zonen */
+    herzfrequenzSpeichern: async ({ request }) => {
+        const data = await request.formData();
+        const maxHr = Number(data.get('maxHr'));
+
+        if (!Number.isFinite(maxHr) || maxHr < 120 || maxHr > 230) {
+            return fail(400, { error: 'Maximale Herzfrequenz muss zwischen 120 und 230 bpm liegen' });
+        }
+
+        await connectDB();
+        const profil = await holeOderErstelleProfil();
+        profil.maxHr = Math.round(maxHr);
         await profil.save();
 
         redirect(303, '/profil?toast=aktualisiert');

@@ -1,5 +1,6 @@
 import { connectDB } from '$lib/server/db.js';
 import Session from '$lib/server/models/session.js';
+import { holeOderErstelleProfil } from '$lib/server/models/profil.js';
 import { parseTCX } from '$lib/server/tcxParser.js';
 import { redirect, fail } from '@sveltejs/kit';
 
@@ -28,8 +29,10 @@ export const actions = {
         }
 
         try {
+            await connectDB();
+            const profil = await holeOderErstelleProfil();
             const xmlString = await datei.text();
-            const geparsed = parseTCX(xmlString);
+            const geparsed = parseTCX(xmlString, { maxHr: profil.maxHr });
 
             if (!geparsed.sport) {
                 return fail(400, {
