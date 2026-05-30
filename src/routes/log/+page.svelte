@@ -2,6 +2,7 @@
     let { data } = $props();
     let sessions = $derived(data.sessions);
     let aktiverFilter = $derived(data.aktiverFilter);
+    let aktivesDatum = $derived(data.aktivesDatum);
 
     const sportEmoji = {
         Kraft: '🏋️',
@@ -17,12 +18,26 @@
         Schwimmen: 'var(--sport-schwimmen)'
     };
 
-    const sportFilter = ['Kraft', 'Laufen', 'Rad', 'Schwimmen'];
+    const sportFilter = ['Kraft', 'Laufen'];
 
     function formatDatum(iso) {
         return new Date(iso).toLocaleDateString('de-CH', {
             weekday: 'short', day: 'numeric', month: 'short'
         });
+    }
+
+    function formatDatumFilter(datum) {
+        return new Date(`${datum}T12:00:00`).toLocaleDateString('de-CH', {
+            day: 'numeric', month: 'short'
+        });
+    }
+
+    function filterLink(sport = '') {
+        const params = new URLSearchParams();
+        if (sport) params.set('sport', sport);
+        if (aktivesDatum) params.set('datum', aktivesDatum);
+        const query = params.toString();
+        return query ? `/log?${query}` : '/log';
     }
 </script>
 
@@ -32,7 +47,8 @@
             <h1>TRAININGS-LOG</h1>
             <p class="anzahl">
                 {sessions.length} {sessions.length === 1 ? 'Session' : 'Sessions'}
-                {#if aktiverFilter}<span class="filter-info">· {aktiverFilter}</span>{/if}
+                {#if aktiverFilter}<span class="filter-info"> / {aktiverFilter}</span>{/if}
+                {#if aktivesDatum}<span class="filter-info"> / {formatDatumFilter(aktivesDatum)}</span>{/if}
             </p>
         </div>
         <div class="header-aktionen">
@@ -48,10 +64,10 @@
 
     <!-- Filter-Pills -->
     <div class="filter-leiste" role="tablist">
-        <a href="/log" class="filter-pill" class:aktiv={!aktiverFilter} role="tab"
+        <a href={filterLink()} class="filter-pill" class:aktiv={!aktiverFilter} role="tab"
             aria-selected={!aktiverFilter}>Alle</a>
         {#each sportFilter as s}
-            <a href="/log?sport={s}"
+            <a href={filterLink(s)}
                 class="filter-pill"
                 class:aktiv={aktiverFilter === s}
                 style="--filter-farbe: {sportFarbe[s]}"
@@ -60,13 +76,19 @@
                 {sportEmoji[s]} {s}
             </a>
         {/each}
+        {#if aktivesDatum}
+            <a href="/log" class="filter-pill">Alle Tage</a>
+        {/if}
     </div>
 
     <div class="session-list">
         {#if sessions.length === 0}
             <div class="empty">
                 <span class="empty-icon">📋</span>
-                {#if aktiverFilter}
+                {#if aktivesDatum && !aktiverFilter}
+                    <p>Keine Sessions an diesem Tag</p>
+                    <p class="sub">Wähle "Alle Tage", um den Datumsfilter zu entfernen.</p>
+                {:else if aktiverFilter}
                     <p>Keine {aktiverFilter}-Sessions</p>
                     <p class="sub">Wähle "Alle" oben, um andere Sessions zu sehen.</p>
                 {:else}
@@ -332,5 +354,77 @@
         font-size: 0.85rem;
         color: var(--text-tertiary);
         margin-top: 0.4rem;
+    }
+
+    @media (min-width: 900px) {
+        .page {
+            max-width: 1180px;
+            padding: 2.25rem 2rem 2rem;
+        }
+
+        header {
+            align-items: center;
+            margin-bottom: 1.25rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        .anzahl {
+            font-size: 0.9rem;
+        }
+
+        .filter-leiste {
+            flex-wrap: wrap;
+            overflow-x: visible;
+            gap: 0.5rem;
+            margin-bottom: 1.35rem;
+            padding-bottom: 0;
+        }
+
+        .filter-pill {
+            padding: 0.58rem 1rem;
+        }
+
+        .session-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 0.85rem;
+            align-items: start;
+        }
+
+        .session-card {
+            min-height: 92px;
+        }
+
+        .session-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .card-left {
+            width: 5px;
+        }
+
+        .card-body,
+        .card-right {
+            padding: 1rem 1.05rem;
+        }
+
+        .sport {
+            font-size: 1.04rem;
+        }
+
+        .dauer {
+            font-size: 1rem;
+        }
+
+        .empty {
+            grid-column: 1 / -1;
+            min-height: 280px;
+            display: grid;
+            place-items: center;
+            align-content: center;
+        }
     }
 </style>

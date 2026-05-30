@@ -14,9 +14,7 @@
     let sportFilter = $state('Kraft');
     const SPORTARTEN_FORTSCHRITT = [
         { id: 'Kraft', label: 'Kraft', verfuegbar: true },
-        { id: 'Laufen', label: 'Laufen', verfuegbar: true },
-        { id: 'Rad', label: 'Rad', verfuegbar: false },
-        { id: 'Schwimmen', label: 'Schwimmen', verfuegbar: false }
+        { id: 'Laufen', label: 'Laufen', verfuegbar: true }
     ];
 
     // Aktuell ausgewählte Übung für Chart-Expand (null = keine offen)
@@ -168,6 +166,12 @@
         return tag.sessions === 0
             ? `${datum} — kein Training`
             : `${datum} — ${tag.sessions} Session${tag.sessions === 1 ? '' : 's'}, Load ${tag.load}`;
+    }
+
+    function tagLink(tag) {
+        if (!tag || tag.sessions === 0) return '';
+        if (tag.sessions === 1 && tag.sessionIds?.[0]) return `/log/${tag.sessionIds[0]}`;
+        return `/log?datum=${tag.datum}`;
     }
 
     const wochentageLabels = ['Mo', '', 'Mi', '', 'Fr', '', ''];
@@ -349,10 +353,20 @@
                             <div class="hm-spalte">
                                 {#each woche as tag}
                                     {#if tag}
-                                        <div class="hm-zelle"
-                                            data-intensitaet={intensitaet(tag.load)}
-                                            title={tagTitel(tag)}>
-                                        </div>
+                                        {@const link = tagLink(tag)}
+                                        {#if link}
+                                            <a class="hm-zelle hm-link"
+                                                href={link}
+                                                data-intensitaet={intensitaet(tag.load)}
+                                                title={tagTitel(tag)}
+                                                aria-label={tagTitel(tag)}>
+                                            </a>
+                                        {:else}
+                                            <div class="hm-zelle"
+                                                data-intensitaet={intensitaet(tag.load)}
+                                                title={tagTitel(tag)}>
+                                            </div>
+                                        {/if}
                                     {:else}
                                         <div class="hm-zelle leer"></div>
                                     {/if}
@@ -961,6 +975,7 @@
     }
 
     .hm-zelle {
+        display: block;
         width: 12px;
         height: 12px;
         border-radius: 3px;
@@ -968,7 +983,12 @@
         transition: transform 0.1s;
     }
 
-    .hm-zelle:not(.leer):hover {
+    .hm-link {
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .hm-link:hover {
         transform: scale(1.4);
     }
 
@@ -1507,5 +1527,118 @@
     .sport-zeit {
         font-size: 0.72rem;
         color: var(--text-tertiary);
+    }
+
+    @media (min-width: 900px) {
+        .page {
+            max-width: 1180px;
+            padding: 2.25rem 2rem 2rem;
+        }
+
+        header {
+            margin-bottom: 1.75rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        .sub {
+            font-size: 0.95rem;
+        }
+
+        .tabs {
+            gap: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab {
+            font-size: 0.98rem;
+        }
+
+        .total-stats {
+            gap: 0.85rem;
+            margin-bottom: 1.35rem;
+        }
+
+        .stat-card {
+            padding: 1.25rem 1rem;
+        }
+
+        .stat-zahl {
+            font-size: 2rem;
+        }
+
+        .chart-section {
+            margin-bottom: 1.35rem;
+        }
+
+        .chart-card {
+            padding: 1.25rem;
+        }
+
+        .section-header {
+            margin-bottom: 1rem;
+        }
+
+        .section-sub {
+            font-size: 0.8rem;
+        }
+
+        .heatmap {
+            justify-content: center;
+            overflow-x: visible;
+        }
+
+        .hm-zelle {
+            width: 14px;
+            height: 14px;
+        }
+
+        .hm-label {
+            height: 14px;
+            line-height: 14px;
+        }
+
+        .records-grid {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 0.85rem;
+        }
+
+        .record-card {
+            padding: 1.1rem;
+        }
+
+        .fortschritt-liste {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 0.85rem;
+            align-items: start;
+        }
+
+        .fi-zeile {
+            min-height: 82px;
+        }
+
+        .fi-chart {
+            padding: 0.75rem 1rem 1.05rem;
+        }
+
+        .lauf-sessions-liste {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 0.75rem;
+        }
+
+        .lauf-session-zeile:hover {
+            transform: translateY(-2px);
+        }
+
+        .empty {
+            min-height: 280px;
+            display: grid;
+            place-items: center;
+            align-content: center;
+        }
     }
 </style>

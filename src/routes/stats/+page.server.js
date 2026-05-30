@@ -69,7 +69,8 @@ export async function load() {
             datum: tag.toISOString().split('T')[0],
             wochentag: tag.getDay(),  // 0=So, 1=Mo ... 6=Sa
             load: 0,
-            sessions: 0
+            sessions: 0,
+            sessionIds: []
         });
     }
 
@@ -80,6 +81,7 @@ export async function load() {
         if (eintrag) {
             eintrag.load += (s.dauer || 0) * (s.rpe || 0);
             eintrag.sessions += 1;
+            eintrag.sessionIds.push(s._id.toString());
         }
     });
 
