@@ -91,6 +91,11 @@
         Schwimmen: 'var(--sport-schwimmen)'
     };
 
+    const AKTIVE_SPORTARTEN = ['Kraft', 'Laufen'];
+    let sichtbareSportarten = $derived(
+        AKTIVE_SPORTARTEN.includes(sport) ? AKTIVE_SPORTARTEN : [sport, ...AKTIVE_SPORTARTEN].filter(Boolean)
+    );
+
     function formatDatum(iso) {
         return new Date(iso).toLocaleDateString('de-CH', {
             weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
@@ -694,9 +699,9 @@
     {:else}
         <!-- Edit-Modus -->
         <form method="POST" action="?/update" use:enhance>
-            <label class="field-label">Sportart</label>
+            <div class="field-label section-label">Sportart</div>
             <div class="sport-grid">
-                {#each ['Kraft', 'Laufen', 'Rad', 'Schwimmen'] as s}
+                {#each sichtbareSportarten as s}
                     <label class="sport-btn" class:gewaehlt={sport === s}>
                         <input type="radio" name="sport" value={s} bind:group={sport} required />
                         <span class="sport-icon-sm">{sportEmoji[s]}</span>
@@ -707,7 +712,7 @@
 
             <!-- Subtyp-Auswahl im Edit-Modus -->
             {#if verfuegbareSubtypen.length > 0}
-                <label class="field-label">Subtyp <span class="optional">(optional)</span></label>
+                <div class="field-label section-label">Subtyp <span class="optional">(optional)</span></div>
                 <div class="subtyp-pills">
                     {#each verfuegbareSubtypen as st}
                         <button type="button"

@@ -150,6 +150,8 @@
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
         font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
         -webkit-font-smoothing: antialiased;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     /* Subtiler Hintergrund-Effekt — leichter Glow oben */
@@ -165,6 +167,25 @@
         pointer-events: none;
         z-index: 0;
         opacity: 0.4;
+    }
+
+    :global(h1),
+    :global(h2),
+    :global(h3),
+    :global(.panel-heading),
+    :global(.section-label) {
+        cursor: default;
+        user-select: none;
+        -webkit-user-select: none;
+        pointer-events: none;
+    }
+
+    :global(input),
+    :global(textarea),
+    :global(select),
+    :global([contenteditable='true']) {
+        user-select: text;
+        -webkit-user-select: text;
     }
 
     .app-content {
@@ -242,5 +263,41 @@
         font-weight: 700;
         letter-spacing: 0.08em;
         text-transform: uppercase;
+    }
+
+    @media (min-width: 900px) {
+        .app-content {
+            padding-bottom: 0;
+            padding-left: 96px;
+        }
+
+        .bottom-nav {
+            top: 0;
+            right: auto;
+            width: 88px;
+            height: 100dvh;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 0.35rem;
+            padding: 1.25rem 0;
+            border-top: none;
+            border-right: 1px solid var(--border);
+        }
+
+        .nav-item {
+            flex: 0;
+            width: 100%;
+            min-height: 70px;
+            justify-content: center;
+        }
+
+        .nav-item.active::before {
+            top: 50%;
+            left: 0;
+            width: 3px;
+            height: 32px;
+            transform: translateY(-50%);
+            border-radius: 0 4px 4px 0;
+        }
     }
 </style>

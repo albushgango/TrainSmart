@@ -5,17 +5,22 @@ import { holeOderErstelleProfil } from '$lib/server/models/profil.js';
 import { SPLITS, naechsterSplitTag } from '$lib/splits.js';
 import { redirect, fail } from '@sveltejs/kit';
 
+const AKTIVE_SPORTARTEN = ['Kraft', 'Laufen'];
+
 /**
  * Lädt Vorschläge für die neue Session:
  * - vorgeschlagenerSport: zuletzt gewählter Sport
  * - vorgeschlagenerSubtyp: nächster Split-Tag (nur bei Kraft, wenn Split aktiv)
  * - aktiveSplitTage: Tage des aktiven Splits (für Pill-Auswahl)
  */
-export async function load() {
+export async function load({ url }) {
     await connectDB();
 
     const profil = await holeOderErstelleProfil();
     const letzte = await Session.findOne().sort({ datum: -1 }).lean();
+    const sportParam = url.searchParams.get('sport');
+    const subtypParam = url.searchParams.get('subtyp');
+    const quelleParam = url.searchParams.get('quelle');
 
     // Aktive Split-Tage bestimmen
     let aktiveSplitTage = [];
@@ -28,12 +33,16 @@ export async function load() {
     // Letzte Kraft-Session für Subtyp-Vorschlag (nur Kraft hat Splits)
     const letzteKraft = await Session.findOne({ sport: 'Kraft' }).sort({ datum: -1 }).lean();
     const vorgeschlagenerSubtyp = naechsterSplitTag(aktiveSplitTage, letzteKraft?.subtyp ?? null);
+    const sportAusParam = AKTIVE_SPORTARTEN.includes(sportParam) ? sportParam : null;
+    const letzterAktiverSport = AKTIVE_SPORTARTEN.includes(letzte?.sport) ? letzte.sport : '';
+    const subtypAusParam = subtypParam?.trim() || null;
 
     return {
-        vorgeschlagenerSport: letzte?.sport ?? '',
-        vorgeschlagenerSubtyp: vorgeschlagenerSubtyp ?? '',
+        vorgeschlagenerSport: sportAusParam ?? (subtypAusParam ? 'Kraft' : letzterAktiverSport),
+        vorgeschlagenerSubtyp: subtypAusParam ?? vorgeschlagenerSubtyp ?? '',
         aktiveSplitTage,
-        aktiverSplit: profil.aktiverSplit
+        aktiverSplit: profil.aktiverSplit,
+        vorschlagQuelle: quelleParam === 'empfehlung' ? 'empfehlung' : ''
     };
 }
 
@@ -41,7 +50,7 @@ export const actions = {
     default: async ({ request }) => {
         const data = await request.formData();
 
-        const sport = data.get('sport');
+        const sport = String(data.get('sport') ?? '');
         const subtyp = data.get('subtyp') ?? '';
         const datum = data.get('datum');
         const dauer = Number(data.get('dauer'));
@@ -56,6 +65,10 @@ export const actions = {
 
         if (!sport || !datum || !dauer || !rpe) {
             return fail(400, { error: 'Bitte alle Pflichtfelder ausfüllen.' });
+        }
+
+        if (!AKTIVE_SPORTARTEN.includes(sport)) {
+            return fail(400, { error: 'Rad und Schwimmen werden später ergänzt. Bitte wähle aktuell Kraft oder Laufen.' });
         }
 
         // Datum darf nicht in der Zukunft liegen
@@ -83,14 +96,32 @@ export const actions = {
                 const eingegebene = JSON.parse(uebungenJson);
                 if (Array.isArray(eingegebene) && eingegebene.length > 0) {
                     const docs = eingegebene
-                        .map(u => ({
-                            sessionId: session._id,
-                            name: String(u.name ?? '').trim(),
-                            saetze: Number(u.saetze) || 1,
-                            wiederholungen: Number(u.wiederholungen) || 1,
-                            gewicht: Number(u.gewicht) || 0,
-                            notiz: ''
-                        }))
+                        .map(u => {
+                            const sets = Array.isArray(u.sets) ? u.sets : [];
+                            const erledigteSets = sets
+                                .map(set => ({
+                                    wiederholungen: Number(set.wiederholungen) || 1,
+                                    gewicht: Number(set.gewicht) || 0,
+                                    erledigt: Boolean(set.erledigt)
+                                }))
+                                .filter(set => set.erledigt);
+                            const referenzSets = erledigteSets.length > 0 ? erledigteSets : [];
+                            const schwerstesSet = referenzSets.reduce((bestes, set) =>
+                                set.gewicht >= bestes.gewicht ? set : bestes, referenzSets[0]
+                            );
+                            const liveNotiz = erledigteSets.length > 0
+                                ? `Live-Sets: ${erledigteSets.map(set => `${set.wiederholungen}x${set.gewicht}kg`).join(', ')}`
+                                : '';
+
+                            return {
+                                sessionId: session._id,
+                                name: String(u.name ?? '').trim(),
+                                saetze: erledigteSets.length || Number(u.saetze) || 1,
+                                wiederholungen: Number(schwerstesSet?.wiederholungen) || Number(u.wiederholungen) || 1,
+                                gewicht: Number(schwerstesSet?.gewicht) || Number(u.gewicht) || 0,
+                                notiz: liveNotiz
+                            };
+                        })
                         .filter(u => u.name.length > 0);
 
                     if (docs.length > 0) {

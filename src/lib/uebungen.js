@@ -107,6 +107,33 @@ export const SUBTYP_GRUPPEN = {
     'Arme': ['Bizeps', 'Trizeps']
 };
 
+export const WORKOUT_VORSCHLAEGE = {
+    'Push': ['Bench Press', 'Incline Bench Press', 'Overhead Press', 'Lateral Raise', 'Tricep Pushdown'],
+    'Pull': ['Pull-Ups', 'Lat Pulldown', 'Barbell Row', 'Face Pull', 'Dumbbell Curl'],
+    'Legs': ['Squat', 'Romanian Deadlift', 'Leg Press', 'Leg Curl', 'Calf Raise'],
+    'Upper': ['Bench Press', 'Lat Pulldown', 'Overhead Press', 'Cable Row', 'Tricep Pushdown', 'Dumbbell Curl'],
+    'Lower': ['Squat', 'Romanian Deadlift', 'Leg Press', 'Leg Curl', 'Calf Raise'],
+    'Full Body': ['Squat', 'Bench Press', 'Lat Pulldown', 'Romanian Deadlift', 'Overhead Press'],
+    'Brust+Rücken': ['Bench Press', 'Incline Bench Press', 'Lat Pulldown', 'Barbell Row', 'Cable Fly'],
+    'Schulter+Arme': ['Overhead Press', 'Lateral Raise', 'Rear Delt Fly', 'Tricep Pushdown', 'Dumbbell Curl'],
+    'Beine': ['Squat', 'Romanian Deadlift', 'Leg Press', 'Leg Extension', 'Calf Raise'],
+    'Brust': ['Bench Press', 'Incline Bench Press', 'Dumbbell Press', 'Cable Fly', 'Dips'],
+    'Rücken': ['Pull-Ups', 'Lat Pulldown', 'Barbell Row', 'Cable Row', 'Face Pull'],
+    'Schulter': ['Overhead Press', 'Lateral Raise', 'Rear Delt Fly', 'Arnold Press', 'Shrugs'],
+    'Arme': ['Close-Grip Bench Press', 'Tricep Pushdown', 'Barbell Curl', 'Hammer Curl', 'Cable Curl']
+};
+
+export function workoutVorschlagFuer(subtyp = '') {
+    if (WORKOUT_VORSCHLAEGE[subtyp]) return WORKOUT_VORSCHLAEGE[subtyp];
+
+    const gruppen = SUBTYP_GRUPPEN[subtyp];
+    if (!gruppen) return [];
+
+    return gruppen
+        .flatMap(gruppe => UEBUNGEN_NACH_GRUPPE[gruppe]?.slice(0, 2) ?? [])
+        .slice(0, 6);
+}
+
 /**
  * Filtert Übungen anhand eines Suchtexts (case-insensitive, sucht in Name)
  * und optional nach Subtyp (passende Muskelgruppen aus SUBTYP_GRUPPEN).

@@ -370,4 +370,74 @@
         opacity: 0.4;
         cursor: not-allowed;
     }
+
+    @media (min-width: 900px) {
+        .page {
+            max-width: 1180px;
+            padding: 2.25rem 2rem 2rem;
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 1rem;
+            align-items: start;
+        }
+
+        header,
+        .error,
+        .card:nth-of-type(3) {
+            grid-column: 1 / -1;
+        }
+
+        header {
+            margin-bottom: 0.75rem;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+        }
+
+        .sub {
+            font-size: 0.95rem;
+        }
+
+        .card {
+            height: 100%;
+            margin-bottom: 0;
+            padding: 1.5rem;
+        }
+
+        .card:nth-of-type(3) {
+            height: auto;
+        }
+
+        h2 {
+            font-size: 1.15rem;
+        }
+
+        .card-sub {
+            font-size: 0.82rem;
+        }
+
+        .ziel-form {
+            min-height: 54px;
+        }
+
+        .split-liste {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 0.8rem;
+        }
+
+        .split-option {
+            min-height: 126px;
+            padding: 1rem;
+        }
+
+        .split-titel {
+            font-size: 1rem;
+        }
+
+        .btn-full {
+            max-width: 360px;
+        }
+    }
 </style>

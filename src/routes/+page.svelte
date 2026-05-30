@@ -46,6 +46,20 @@
     let gewaehltesIstHeute = $derived(
         wochenTage.find(t => t.datum === gewaehlterTag)?.istHeute ?? false
     );
+
+    let kannTrainingVorbereiten = $derived(
+        !empfehlung.typ.startsWith('Erledigt') && empfehlung.typ !== 'Rest'
+    );
+
+    let empfehlungHref = $derived.by(() => {
+        const params = new URLSearchParams({
+            sport: 'Kraft',
+            quelle: 'empfehlung'
+        });
+
+        if (empfehlung.naechsterTag) params.set('subtyp', empfehlung.naechsterTag);
+        return `/log/new?${params.toString()}`;
+    });
 </script>
 
 <div class="page">
@@ -63,125 +77,133 @@
         {/if}
     </header>
 
-    <!-- Wochenkalender: 7 Pills, klickbar, Punkt unter Tagen mit Aktivität -->
-    <section class="wochenkalender" role="tablist" aria-label="Wochentage">
-        {#each wochenTage as tag}
-            <button class="wk-tag"
-                class:aktiv={gewaehlterTag === tag.datum}
-                class:heute={tag.istHeute}
-                onclick={() => (gewaehlterTag = tag.datum)}
-                role="tab"
-                aria-selected={gewaehlterTag === tag.datum}>
-                <span class="wk-wt">{tag.wochentag}</span>
-                <span class="wk-num">{tag.tagesnummer}</span>
-                {#if tag.sessionsAnzahl > 0}
-                    <span class="wk-punkt" aria-label="{tag.sessionsAnzahl} Sessions"></span>
-                {/if}
-            </button>
-        {/each}
-    </section>
+    <div class="dashboard-grid">
+        <!-- Wochenkalender: 7 Pills, klickbar, Punkt unter Tagen mit Aktivität -->
+        <section class="wochenkalender" role="tablist" aria-label="Wochentage">
+            {#each wochenTage as tag}
+                <button class="wk-tag"
+                    class:aktiv={gewaehlterTag === tag.datum}
+                    class:heute={tag.istHeute}
+                    onclick={() => (gewaehlterTag = tag.datum)}
+                    role="tab"
+                    aria-selected={gewaehlterTag === tag.datum}>
+                    <span class="wk-wt">{tag.wochentag}</span>
+                    <span class="wk-num">{tag.tagesnummer}</span>
+                    {#if tag.sessionsAnzahl > 0}
+                        <span class="wk-punkt" aria-label="{tag.sessionsAnzahl} Sessions"></span>
+                    {/if}
+                </button>
+            {/each}
+        </section>
 
-    <!-- Tagesempfehlung -->
-    <section class="empfehlung-card" style="--empf-farbe: {empfehlung.farbe}">
-        <div class="empf-glow"></div>
-        <div class="empf-content">
-            <div class="empf-header">
-                <span class="empf-label">Empfehlung heute</span>
-                <span class="empf-typ">{empfehlung.typ}</span>
+        <!-- Tagesempfehlung -->
+        <section class="empfehlung-card" style="--empf-farbe: {empfehlung.farbe}">
+            <div class="empf-glow"></div>
+            <div class="empf-content">
+                <div class="empf-header">
+                    <span class="empf-label">Empfehlung heute</span>
+                    <span class="empf-typ">{empfehlung.typ}</span>
+                </div>
+                <p class="empf-grund">{empfehlung.grund}</p>
+                {#if empfehlung.naechsterTag}
+                    <div class="split-vorschlag">
+                        <span class="split-label">Laut deinem Split:</span>
+                        <span class="split-tag">{empfehlung.naechsterTag}</span>
+                    </div>
+                {/if}
+                {#if kannTrainingVorbereiten}
+                    <a href={empfehlungHref} class="empf-aktion">
+                        <span>{empfehlung.naechsterTag ? `${empfehlung.naechsterTag} vorbereiten` : 'Training vorbereiten'}</span>
+                        <span class="empf-aktion-pfeil">→</span>
+                    </a>
+                {/if}
             </div>
-            <p class="empf-grund">{empfehlung.grund}</p>
-            {#if empfehlung.naechsterTag}
-                <div class="split-vorschlag">
-                    <span class="split-label">Laut deinem Split:</span>
-                    <span class="split-tag">{empfehlung.naechsterTag}</span>
+        </section>
+
+        <!-- Wochenziel Fortschritt -->
+        <section class="wochenziel-card">
+            <div class="wz-header">
+                <span class="wz-label">Wochenziel</span>
+                <span class="wz-zaehler">
+                    <strong>{wochenziel.erreicht}</strong>
+                    <span class="wz-trenner">/</span>
+                    <span class="wz-ziel">{wochenziel.ziel}</span>
+                </span>
+            </div>
+            <div class="wz-balken">
+                <div class="wz-fortschritt"
+                    style="width: {wochenziel.prozent}%"
+                    class:erreicht={wochenziel.prozent >= 100}>
+                </div>
+            </div>
+            <p class="wz-text">
+                {#if wochenziel.prozent >= 100}
+                    Wochenziel erreicht! 🎉
+                {:else if wochenziel.erreicht === 0}
+                    Noch keine Session diese Woche
+                {:else}
+                    Noch {wochenziel.ziel - wochenziel.erreicht} {wochenziel.ziel - wochenziel.erreicht === 1 ? 'Session' : 'Sessions'} bis zum Ziel
+                {/if}
+            </p>
+        </section>
+
+        <!-- Quick-Log Button -->
+        <a href="/log/new" class="quick-log-btn">
+            <span class="plus">+</span>
+            <span>Session loggen</span>
+        </a>
+
+        <!-- Sessions des gewählten Tages (oder Fallback "Zuletzt") -->
+        <section class="letzte-section">
+            <div class="section-header">
+                <h2>
+                    {#if gewaehltesIstHeute}
+                        Heute
+                    {:else}
+                        {formatLangesDatum(gewaehlterTag + 'T00:00:00')}
+                    {/if}
+                </h2>
+                <a href="/log" class="alle-link">Alle →</a>
+            </div>
+
+            {#if gewaehlteSessions.length === 0}
+                <div class="empty-state">
+                    <span class="empty-icon">💪</span>
+                    {#if gewaehltesIstHeute}
+                        <p>Heute noch nichts trainiert</p>
+                        <p class="sub">Tippe oben auf "+ Session loggen"</p>
+                    {:else}
+                        <p>Kein Training an diesem Tag</p>
+                        <p class="sub">Wähle einen anderen Tag oder logge eine Session</p>
+                    {/if}
+                </div>
+            {:else}
+                <div class="session-list">
+                    {#each gewaehlteSessions as session (session._id)}
+                        <a href="/log/{session._id}" class="session-card"
+                            style="--card-farbe: {sportFarbe[session.sport]}">
+                            <div class="card-accent"></div>
+                            <div class="card-body">
+                                <span class="sport">
+                                    {sportEmoji[session.sport] ?? ''} {session.sport}{#if session.subtyp}<span class="subtyp-badge">{session.subtyp}</span>{/if}
+                                </span>
+                                <span class="datum">{formatDatum(session.datum)}</span>
+                            </div>
+                            <div class="card-right">
+                                {#if session.distanz}
+                                    <span class="dauer">{session.distanz} km</span>
+                                    <span class="rpe">{session.dauer} min</span>
+                                {:else}
+                                    <span class="dauer">{session.dauer} min</span>
+                                    <span class="rpe">RPE {session.rpe}</span>
+                                {/if}
+                            </div>
+                        </a>
+                    {/each}
                 </div>
             {/if}
-        </div>
-    </section>
-
-    <!-- Wochenziel Fortschritt -->
-    <section class="wochenziel-card">
-        <div class="wz-header">
-            <span class="wz-label">Wochenziel</span>
-            <span class="wz-zaehler">
-                <strong>{wochenziel.erreicht}</strong>
-                <span class="wz-trenner">/</span>
-                <span class="wz-ziel">{wochenziel.ziel}</span>
-            </span>
-        </div>
-        <div class="wz-balken">
-            <div class="wz-fortschritt"
-                style="width: {wochenziel.prozent}%"
-                class:erreicht={wochenziel.prozent >= 100}>
-            </div>
-        </div>
-        <p class="wz-text">
-            {#if wochenziel.prozent >= 100}
-                Wochenziel erreicht! 🎉
-            {:else if wochenziel.erreicht === 0}
-                Noch keine Session diese Woche
-            {:else}
-                Noch {wochenziel.ziel - wochenziel.erreicht} {wochenziel.ziel - wochenziel.erreicht === 1 ? 'Session' : 'Sessions'} bis zum Ziel
-            {/if}
-        </p>
-    </section>
-
-    <!-- Quick-Log Button -->
-    <a href="/log/new" class="quick-log-btn">
-        <span class="plus">+</span>
-        <span>Session loggen</span>
-    </a>
-
-    <!-- Sessions des gewählten Tages (oder Fallback "Zuletzt") -->
-    <section class="letzte-section">
-        <div class="section-header">
-            <h2>
-                {#if gewaehltesIstHeute}
-                    Heute
-                {:else}
-                    {formatLangesDatum(gewaehlterTag + 'T00:00:00')}
-                {/if}
-            </h2>
-            <a href="/log" class="alle-link">Alle →</a>
-        </div>
-
-        {#if gewaehlteSessions.length === 0}
-            <div class="empty-state">
-                <span class="empty-icon">💪</span>
-                {#if gewaehltesIstHeute}
-                    <p>Heute noch nichts trainiert</p>
-                    <p class="sub">Tippe oben auf "+ Session loggen"</p>
-                {:else}
-                    <p>Kein Training an diesem Tag</p>
-                    <p class="sub">Wähle einen anderen Tag oder logge eine Session</p>
-                {/if}
-            </div>
-        {:else}
-            <div class="session-list">
-                {#each gewaehlteSessions as session (session._id)}
-                    <a href="/log/{session._id}" class="session-card"
-                        style="--card-farbe: {sportFarbe[session.sport]}">
-                        <div class="card-accent"></div>
-                        <div class="card-body">
-                            <span class="sport">
-                                {sportEmoji[session.sport] ?? ''} {session.sport}{#if session.subtyp}<span class="subtyp-badge">{session.subtyp}</span>{/if}
-                            </span>
-                            <span class="datum">{formatDatum(session.datum)}</span>
-                        </div>
-                        <div class="card-right">
-                            {#if session.distanz}
-                                <span class="dauer">{session.distanz} km</span>
-                                <span class="rpe">{session.dauer} min</span>
-                            {:else}
-                                <span class="dauer">{session.dauer} min</span>
-                                <span class="rpe">RPE {session.rpe}</span>
-                            {/if}
-                        </div>
-                    </a>
-                {/each}
-            </div>
-        {/if}
-    </section>
+        </section>
+    </div>
 </div>
 
 <style>
@@ -189,6 +211,10 @@
         max-width: 480px;
         margin: 0 auto;
         padding: 1.75rem 1rem 1rem;
+    }
+
+    .dashboard-grid {
+        display: grid;
     }
 
     /* Header */
@@ -394,6 +420,32 @@
         font-size: 0.82rem;
         font-weight: 700;
         box-shadow: 0 0 14px var(--accent-glow);
+    }
+
+    .empf-aktion {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-top: 1rem;
+        padding: 0.85rem 1rem;
+        background: var(--cta-bg);
+        color: var(--cta-color);
+        border-radius: var(--radius-md);
+        text-decoration: none;
+        font-size: 0.92rem;
+        font-weight: 800;
+        transition: transform 0.15s, background 0.15s;
+    }
+
+    .empf-aktion:hover {
+        background: var(--cta-bg-hover);
+        transform: translateY(-1px);
+    }
+
+    .empf-aktion-pfeil {
+        font-size: 1.1rem;
+        line-height: 1;
     }
 
     /* Wochenziel */
@@ -639,5 +691,109 @@
         font-size: 0.85rem;
         color: var(--text-tertiary);
         margin-top: 0.2rem;
+    }
+
+    @media (min-width: 900px) {
+        .page {
+            max-width: 1180px;
+            padding: 2.25rem 2rem 2rem;
+        }
+
+        header {
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        h1 {
+            font-size: 2rem;
+        }
+
+        .dashboard-grid {
+            grid-template-columns: minmax(0, 1fr) minmax(330px, 380px);
+            grid-template-areas:
+                "empfehlung kalender"
+                "empfehlung sessions"
+                "ziel sessions"
+                "aktion sessions";
+            gap: 1rem 1.1rem;
+            align-items: start;
+        }
+
+        .wochenkalender {
+            grid-area: kalender;
+            margin-bottom: 0;
+            padding: 0.85rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            gap: 0.45rem;
+        }
+
+        .wk-tag {
+            min-height: 66px;
+            border-color: var(--border);
+            background: var(--bg-input);
+        }
+
+        .empfehlung-card {
+            grid-area: empfehlung;
+            min-height: 310px;
+            margin-bottom: 0;
+            padding: 2rem;
+            display: flex;
+            align-items: stretch;
+        }
+
+        .empf-content {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .empf-header {
+            align-items: flex-start;
+        }
+
+        .empf-typ {
+            font-size: 2.35rem;
+        }
+
+        .empf-grund {
+            max-width: 58ch;
+            font-size: 1rem;
+        }
+
+        .empf-aktion {
+            max-width: 360px;
+            margin-top: auto;
+        }
+
+        .wochenziel-card {
+            grid-area: ziel;
+            margin-bottom: 0;
+        }
+
+        .quick-log-btn {
+            grid-area: aktion;
+            margin-bottom: 0;
+        }
+
+        .letzte-section {
+            grid-area: sessions;
+            margin-top: 0;
+            min-width: 0;
+        }
+
+        .section-header {
+            margin-bottom: 0.75rem;
+        }
+
+        .empty-state {
+            min-height: 230px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
     }
 </style>
