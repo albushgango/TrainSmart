@@ -335,37 +335,119 @@ Beschreibt die **gestaltete und implementierte App** – nicht das Mockup. An ei
 
 ### 3.5 Validate
 
-> **Hinweis:** Die Evaluation wird vor der finalen Abgabe durchgeführt. Diese Sektion wird mit den Resultaten ergänzt.
+Die Usability Evaluation wird in der PT-Kleinklasse am **20.05.2026** durchgeführt und direkt in dieser README dokumentiert. Grundlage sind die Anforderungen aus SW14: getestete Version festhalten, Ziele definieren, Vorgehen beschreiben, Stichprobe dokumentieren, Szenarien ausformulieren, Beobachtungen sammeln, Issues priorisieren und Verbesserungen ableiten.
 
-- **URL der getesteten Version:** Wird die produktive Version unter [trainsmartv1.netlify.app](https://trainsmartv1.netlify.app) zum Zeitpunkt des Tests sein. Falls eine separate Test-Version sinnvoll ist (z.B. mit Demo-Daten-Seed), wird diese ergänzt.
+- **URL der getesteten Version:** [trainsmartv1.netlify.app](https://trainsmartv1.netlify.app)
+- **Zustand der evaluierten Version:** Produktive Netlify-Version am 20.05.2026. Die ausgefüllten Protokolle liegen als Dokumentation zusätzlich unter `docs/usability-evaluation-protokoll_donart_imeri.docx` und `docs/usability-evaluation-protokoll_adi_lama.docx`.
+- **Testform:** Moderierter On-site-Test mit Think-Aloud-Methode. Die Testperson bedient den Prototyp selbst und spricht laut aus, was sie erwartet, sucht, versteht oder nicht versteht.
+- **Infrastruktur:** Smartphone oder Notebook mit Browser, stabile Internetverbindung, geöffnete TrainSmart-App, Protokollvorlage/Feedback-Grid.
+- **Zeitbudget:** ca. 10 Minuten pro Testperson, gemäss Übungssetting.
+- **Testleitung:** Albushi beobachtet, gibt die Aufgaben schriftlich, greift nur bei Blockern ein und protokolliert Verhalten, Aussagen und Probleme.
 
-- **Ziele der Prüfung:**
-    1. Ist der Hauptworkflow (Session loggen) intuitiv und in <30 Sekunden machbar?
-    2. Wird die Tagesempfehlung verstanden und als nützlich empfunden?
-    3. Ist die Übungs-Erfassung (Combobox + Werte) ohne Erklärung bedienbar?
-    4. Bietet das Statistik-Dashboard (besonders Fortschritts-Tab) einen klaren Mehrwert?
+#### 3.5.1 Ziele und Fragestellungen
 
-- **Vorgehen:** Moderierter, on-site Usability-Test mit Think-Aloud-Methode. Tester nutzt die App auf einem iPhone, beschreibt laut was er macht und denkt. Beobachter (ich) protokolliert.
+Die Evaluation fokussiert auf die wichtigsten End-to-End-Workflows, die für den Prototyp und die Abgabe relevant sind.
 
-- **Stichprobe:** 2-3 Personen aus dem persönlichen Umfeld
-    - 1× Aktiver Mehrsportler (ähnliches Profil zur Primärpersona)
-    - 1× Gelegenheits-Sportler (entspricht Sekundärpersona Sandra)
-    - 1× Nicht-Sportler (für Bedienbarkeits-Baseline)
+1. **Session loggen:** Finden Testpersonen den Einstieg zum Erfassen einer neuen Trainingseinheit und können sie eine Session vollständig speichern?
+2. **Krafttraining mit Übungen:** Verstehen Testpersonen, wie sie bei einer Kraft-Session Übungen, Sätze, Wiederholungen und Gewicht erfassen?
+3. **Trainingsübersicht:** Finden Testpersonen eine gespeicherte Session im Log wieder und verstehen sie Filter bzw. Detailansicht?
+4. **Tagesempfehlung:** Verstehen Testpersonen auf dem Dashboard, ob heute Heavy, Light oder Rest sinnvoll ist und warum?
+5. **Fortschritt/Stats:** Können Testpersonen erkennen, wo Trainingsfortschritt und Wochenload sichtbar werden?
+6. **Profil/Split:** Ist verständlich, wo persönliche Trainingslogik wie Wochenziel und Kraft-Split eingestellt wird?
 
-- **Aufgaben/Szenarien (geplant):**
-    1. *"Stell dir vor, du hast gerade Krafttraining absolviert. Logge die Session inkl. mindestens 2 Übungen."*
-    2. *"Du willst wissen, ob du heute trainieren solltest. Wo findest du die Antwort?"*
-    3. *"Wo kannst du sehen, wie sich dein Bench-Press-Gewicht entwickelt hat?"*
-    4. *"Du hast einen 'Push/Pull/Legs'-Split. Wo aktivierst du das?"*
+#### 3.5.2 Stichprobe
 
-- **Kennzahlen & Beobachtungen:** Wird ergänzt nach Durchführung.
+Die Evaluation wurde mit zwei Mitstudierenden durchgeführt. TP1 hat ein ausführliches Protokoll ausgefüllt. TP2 hat die Szenario-Aufgaben ebenfalls durchgespielt und zusätzlich qualitatives Feedback aus Sicht eines sehr aktiven Gym-Nutzers gegeben. Dadurch konnten sowohl der allgemeine Workflow als auch der wichtigste Spezialfall "Krafttraining / Progressive Overload" geprüft werden.
 
-- **Zusammenfassung der Resultate:** Wird ergänzt nach Durchführung.
+| Testperson | Profil | Sportbezug | Gerät / Browser | Status |
+|------------|--------|------------|----------------|--------|
+| TP1: Donart Imeri | Mitstudent | Fitness | nicht dokumentiert | Szenario-Test durchgeführt |
+| TP2: Adi Lama | Mitstudent | sehr aktiver Gym-Nutzer / Krafttraining | nicht dokumentiert | Szenario-Test + Gym-Feedback durchgeführt |
 
-- **Abgeleitete Verbesserungen:** Wird ergänzt nach Durchführung. Bereits in der Entwicklung umgesetzte Verbesserungen aus eigenem Test:
-    - **Datum-Validierung** ergänzt: User konnte Sessions in der Zukunft loggen → `max`-Attribut + Server-Validierung
-    - **Übungs-Combobox** auf der Detail-Seite zeigt jetzt alle 60 Vorschläge (vorher nur History) → Custom-Dropdown statt nativem `<datalist>`
-    - **CSV-Export** Routing-Konflikt → Endpoint von `/log/export` nach `/export` verschoben
+#### 3.5.3 Testaufgaben / Szenarien
+
+Die Aufgaben sind bewusst als Alltagssituationen formuliert und nennen möglichst nicht direkt die UI-Begriffe oder Lösungsschritte.
+
+Für das 10-Minuten-Setting werden **Aufgaben 1-4** als Kernaufgaben verwendet. **Aufgaben 5-6** sind Zusatzaufgaben, falls eine Testperson schnell ist oder ein zweiter Testdurchlauf mehr Zeit bietet.
+
+**Aufgabe 1: Training nachtragen**  
+Du hast gestern ein Krafttraining gemacht: 65 Minuten, anstrengend aber nicht maximal. Du möchtest dieses Training in deiner Trainings-App festhalten. Erfasse zusätzlich zwei Übungen: Bankdrücken mit 4 Sätzen à 8 Wiederholungen und Kniebeugen mit 3 Sätzen à 10 Wiederholungen.
+
+**Aufgabe 2: Gespeichertes Training wiederfinden**  
+Du möchtest kontrollieren, ob dein gerade erfasstes Training gespeichert wurde. Suche den Eintrag und öffne die Details.
+
+**Aufgabe 3: Training korrigieren**  
+Dir fällt auf, dass die Dauer des Trainings eigentlich 70 Minuten war. Passe den Eintrag entsprechend an.
+
+**Aufgabe 4: Tagesentscheidung treffen**  
+Du öffnest die App am Morgen und willst wissen, ob heute eher ein hartes Training, ein lockeres Training oder Pause sinnvoll ist. Finde die Information und erkläre kurz, was du daraus ableitest.
+
+**Aufgabe 5: Fortschritt prüfen**  
+Du möchtest wissen, ob du bei Kraftübungen Fortschritte machst und wie deine letzte Trainingsbelastung aussieht. Suche die passende Übersicht und beschreibe, welche Informationen dir helfen.
+
+**Aufgabe 6: Trainingsprofil anpassen**  
+Du möchtest ein Wochenziel setzen und mit einem Push/Pull/Legs-Split trainieren. Finde heraus, wo du diese Einstellungen anpassen würdest.
+
+#### 3.5.4 Messwerte und Beobachtungen
+
+Während der Tests werden pro Aufgabe folgende Punkte notiert:
+
+- **Erfolg:** geschafft / mit Hilfe geschafft / nicht geschafft
+- **Zeitbedarf:** grob in Minuten oder Sekunden
+- **Auffälligkeiten:** Suchbewegungen, Missverständnisse, falsche Klicks, sichtbare Unsicherheit
+- **Originalaussagen:** kurze Zitate oder sinngemässe Aussagen der Testperson
+- **Schweregrad:** 0 = kein Problem, 1 = kosmetisch, 2 = kleines Problem, 3 = grosses Problem, 4 = kritisch
+
+| Aufgabe | TP1 | TP2 | Beobachtung / Issue | Schweregrad |
+|---------|-----|-----|----------------------|-------------|
+| 1 Session erfassen | geschafft, ca. 120 Sek. | geschafft, ca. 120 Sek. | Post-Workout-Logging funktioniert. Adi wünscht sich zusätzlich einen aktiven Trainingsmodus während dem Gym. | 2 |
+| 2 Session wiederfinden | geschafft, ca. 10 Sek. | geschafft, ca. 10 Sek. | Einträge sind gut auffindbar. Für Gym wären zusätzliche Split-/Übungsinfos in der Liste nützlich. | 1 |
+| 3 Session korrigieren | geschafft, ca. 10 Sek. | geschafft, ca. 15 Sek. | Bearbeiten und Speichern wurden verstanden. | 0 |
+| 4 Tagesempfehlung verstehen | geschafft, ca. 20 Sek. | geschafft, aber teilweise unklar | Empfehlung ist sichtbar, sollte aber stärker erklären bzw. direkt zu einem Trainingsvorschlag führen. | 3 |
+| 5 Fortschritt prüfen | geschafft, ca. 10 Sek. | geschafft, ca. 15 Sek. | Fortschritt wird gefunden und als nützlich bewertet. Donart wünscht detailliertere Diagramme, Adi anklickbare Aktivitäts-Punkte. | 2 |
+| 6 Profil anpassen | geschafft, ca. 30 Sek. | geschafft, ca. 30 Sek. | Wochenziel und Trainings-Split werden gefunden und als nützlich verstanden. | 0 |
+
+#### 3.5.5 Feedback-Grid
+
+| Positiv / hat gut funktioniert | Negativ / hat gestört | Neue Ideen / Anforderungen | Unklar / offene Fragen |
+|--------------------------------|------------------------|-----------------------------|------------------------|
+| Die Hauptworkflows funktionierten bei beiden Testpersonen. Donart fand die Bedienung natürlich und simpel. Adi bewertete Gym-Splits, Wochenziel und Übungsfilter nach Split sehr positiv. | Die Desktop/Tablet-Ansicht wirkt noch zu stark wie eine Handy-App. Einzelne nicht editierbare Bereiche wirken anklickbar. Die Empfehlung auf der Hauptseite ist noch zu wenig handlungsorientiert. Rad und Schwimmen wirken noch weniger ausgebaut. | Trainingsplan mit Geräten bzw. Übungen empfehlen. Empfehlung anklickbar machen und daraus ein vorgeschlagenes Training erzeugen. Übungsvorschau mit Standard-Sets anzeigen. Live-Workout-Modus für Sets, Wiederholungen und Gewicht. Aktivitäts-Punkte anklickbar machen. Später Gewicht und Kalorien tracken. | Bei Donart gab es keine offenen Fragen. Bei Adi war unklar, ob die Tagesempfehlung nur informieren soll oder ob daraus direkt ein Training gestartet werden kann. |
+
+#### 3.5.6 Issue Map und Handlungsempfehlungen
+
+| Ort / Screen | Problem | Ursache / Vermutung | Empfehlung | Priorität |
+|--------------|---------|---------------------|------------|-----------|
+| Dashboard / Tagesempfehlung | Empfehlung ist nützlich, aber noch nicht direkt handlungsorientiert | Empfehlung zeigt "Heavy/Light/Rest", bietet aber keinen nächsten konkreten Schritt | Empfehlung klickbar machen und basierend auf Wochenziel + Split ein konkretes Training vorschlagen | hoch |
+| Neue Session / Krafttraining | Übungsvorschläge könnten noch stärker vorbereitet sein | Split ist bekannt, daraus könnten konkrete Übungen vorgeschlagen werden | Pro Split automatisch Übungen anzeigen, z.B. 2 Sets als Standard, weitere Sets manuell hinzufügbar | hoch |
+| Neue Session / Krafttraining | Gym-Nutzer möchte Übungen nicht erst nach dem Training erfassen, sondern während des Trainings tracken | Aktueller Workflow ist eher ein Trainings-Tagebuch nach dem Training | Optionalen "Training starten"-Modus ergänzen: Übungsvorschau, Sets abhaken, Gewicht/Wdh direkt eintragen | mittel |
+| Layout / Responsive Design | Desktop/Tablet-Ansicht nutzt den Platz noch nicht optimal | App ist stark mobile-first gebaut | Für grössere Screens eigenes Layout mit breiterer Statistik-/Listenansicht bauen | mittel |
+| Interaktive Elemente / Felder | Einzelne Bereiche wirken anklickbar, obwohl dort nichts bearbeitet werden kann | Visuelles Styling unterscheidet nicht klar genug zwischen Anzeige und Eingabe | Nur echte Eingabefelder interaktiv wirken lassen; reine Anzeigeelemente visueller abgrenzen | tief |
+| Loggen / Sportarten | Rad und Schwimmen wirken sichtbar, obwohl sie noch weniger ausgebaut sind | Alle Sportarten werden gleich prominent angezeigt | Rad/Schwimmen temporär reduzieren, als "später" markieren oder Funktionalität klarer begrenzen | tief |
+| Stats / Aktivität | Grüne Aktivitäts-Punkte sind nicht direkt anklickbar | Heatmap zeigt Aktivität, führt aber nicht zur Session | Punkte/Tage anklickbar machen und passende Sessions öffnen | mittel |
+| Stats / Fortschritt | Gewichts-Fortschritt könnte detaillierter dargestellt werden | Aktuelle Diagramme geben Überblick, aber wenig Detailtiefe | Fortschrittsdiagramme ausbauen und Detailansicht pro Übung verbessern | mittel |
+| Allgemeines UI | Es gibt keinen Hell-/Dunkelmodus-Wechsel | Dark Theme ist fest vorgegeben | Optionalen Theme-Switch als spätere Komfortfunktion prüfen | tief |
+
+#### 3.5.7 Zusammenfassung der Resultate
+
+Die Szenario-Tests zeigen, dass die Kernworkflows grundsätzlich funktionieren: Session erfassen, Eintrag wiederfinden, bearbeiten, Tagesempfehlung ansehen und Profil anpassen. Besonders stark wahrgenommen werden die Gym-spezifischen Funktionen: Wochenziel, Trainings-Split und gefilterte Übungsauswahl passen gut zum Use Case eines aktiven Kraftsportlers. Gleichzeitig zeigt sich, dass die Tagesempfehlung noch stärker in eine konkrete Handlung übersetzt werden sollte. Besonders wertvoll wäre ein Ablauf, bei dem aus Wochenziel und Split automatisch ein Training vorgeschlagen wird, das direkt gestartet und während des Trainings getrackt werden kann.
+
+#### 3.5.8 Abgeleitete Verbesserungen
+
+Aus der Evaluation ergeben sich folgende priorisierte Verbesserungen:
+
+1. **Tagesempfehlung klickbar und handlungsorientiert machen (hoch):** Klick auf "Heavy/Light/Rest" soll zu einem konkreten Trainingsvorschlag führen.
+2. **Automatische Gym-Workout-Vorschläge ergänzen (hoch):** Basierend auf Wochenziel und aktivem Split sollen passende Übungen vorgeschlagen werden, inklusive kurzer Vorschau und Standardwerten.
+3. **Live-Workout-Modus prüfen (mittel):** Neben dem Nachtragen soll ein Training aktiv gestartet werden können, damit Sets, Wiederholungen und Gewicht während dem Gym erfasst werden.
+4. **Stats interaktiver machen (mittel):** Aktivitäts-Punkte und relevante Statistik-Elemente sollen direkt zur passenden Session führen.
+5. **Responsive Layout verbessern (mittel):** Auf Laptop und Tablet soll die App den verfügbaren Platz besser nutzen.
+6. **Unfertige Sportarten reduzieren oder kennzeichnen (tief):** Rad und Schwimmen sollen entweder klarer ausgebaut oder vorübergehend weniger prominent angezeigt werden.
+7. **Spätere Erweiterungen sammeln (tief):** Körpergewicht und Kalorien-Tracking als mögliche Zukunftsfunktionen dokumentieren.
+
+Bereits vor der formalen Evaluation aus eigenem Testen umgesetzt:
+
+- **Datum-Validierung:** Sessions können nicht mehr versehentlich in der Zukunft erfasst werden.
+- **Übungs-Combobox:** Übungsvorschläge sind beim Erfassen und Bearbeiten besser sichtbar.
+- **CSV-Export:** Export-Route wurde auf `/export` verschoben, damit sie auf Netlify nicht mit `/log/[id]` kollidiert.
 
 ---
 
@@ -379,7 +461,7 @@ Die folgenden Erweiterungen wurden über den Mindestumfang der Übungen ab SW8 h
 - **Wo umgesetzt:**
     - Frontend: [`src/routes/+page.svelte`](src/routes/+page.svelte), Sektion "Wochenkalender"
     - Backend: [`src/routes/+page.server.js`](src/routes/+page.server.js), Funktionen `aktuellerWochenStart()`, `baueWochenTage()`, `wochenSessions`
-- **Referenz:** Screenshot wird nach Evaluation ergänzt
+- **Referenz:** Evaluierte Netlify-Version vom 20.05.2026 und Usability-Protokolle unter `docs/`
 - **Aus Evaluation abgeleitet?:** Nein, eigene Initiative
 
 ### 4.2 Tagesempfehlung mit Heuristik
