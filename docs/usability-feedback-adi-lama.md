@@ -37,16 +37,15 @@ Adi bewertet die Gym-Funktionen als besonders stark. Positiv aufgefallen sind:
 
 ## 4. Abgeleitete Issues
 
-| Ort / Screen | Problem | Empfehlung | Schweregrad |
-|--------------|---------|------------|-------------|
-| Dashboard | Tagesempfehlung ist noch zu wenig handlungsorientiert | Empfehlung klickbar machen und daraus einen Trainingsvorschlag ableiten | 3 |
-| Krafttraining | Übungen werden gefiltert, aber noch nicht als kompletter Workout-Vorschlag angeboten | Automatische Übungsvorschau pro Split einbauen | 3 |
-| Neue Session | App eignet sich eher zum Nachtragen als zum Live-Tracking während dem Gym | Optionalen "Training starten"-Modus ergänzen | 2 |
-| Responsive Layout | Desktop/Tablet-Ansicht nutzt den Platz nicht optimal | Gerätespezifische Layouts für grössere Screens verbessern | 2 |
-| Sportauswahl | Rad und Schwimmen sind sichtbar, obwohl sie weniger ausgebaut sind | Temporär reduzieren oder klar als späteren Ausbau kennzeichnen | 1 |
-| Stats / Aktivität | Aktivitätspunkte sind nicht direkt anklickbar | Punkte mit Session-Details verlinken | 2 |
+| Ort / Screen      | Problem                                                                              | Empfehlung                                                              | Schweregrad |
+| ----------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- | ----------- |
+| Dashboard         | Tagesempfehlung ist noch zu wenig handlungsorientiert                                | Empfehlung klickbar machen und daraus einen Trainingsvorschlag ableiten | 3           |
+| Krafttraining     | Übungen werden gefiltert, aber noch nicht als kompletter Workout-Vorschlag angeboten | Automatische Übungsvorschau pro Split einbauen                          | 3           |
+| Neue Session      | App eignet sich eher zum Nachtragen als zum Live-Tracking während dem Gym            | Optionalen "Training starten"-Modus ergänzen                            | 2           |
+| Responsive Layout | Desktop/Tablet-Ansicht nutzt den Platz nicht optimal                                 | Gerätespezifische Layouts für grössere Screens verbessern               | 2           |
+| Sportauswahl      | Rad und Schwimmen sind sichtbar, obwohl sie weniger ausgebaut sind                   | Temporär reduzieren oder klar als späteren Ausbau kennzeichnen          | 1           |
+| Stats / Aktivität | Aktivitätspunkte sind nicht direkt anklickbar                                        | Punkte mit Session-Details verlinken                                    | 2           |
 
 ## 5. Kurze Zusammenfassung
 
 Adi sieht den grössten Mehrwert von TrainSmart im Gym-Bereich, insbesondere bei Splits, Wochenziel und Übungsfilterung. Für ihn sollte die App stärker vom reinen Trainingslog zu einem Trainingsbegleiter werden: Die Tagesempfehlung soll konkrete Workouts vorschlagen, die man direkt starten und während dem Training tracken kann.
-

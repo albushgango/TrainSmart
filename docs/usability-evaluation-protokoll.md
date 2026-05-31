@@ -24,11 +24,11 @@ Ich helfe möglichst wenig und notiere nur Beobachtungen. Nach jeder Aufgabe ste
 
 ## 2. Testperson
 
-Code: TP___  
+Code: TP\_\_\_  
 Profil:  
 Sportbezug:  
 Gerät:  
-Browser:  
+Browser:
 
 ---
 
@@ -135,12 +135,12 @@ Nachfrage:
 ## 4. Feedback-Grid
 
 | Was hat gut funktioniert? | Was hat schlecht funktioniert oder gestört? |
-|---------------------------|---------------------------------------------|
+| ------------------------- | ------------------------------------------- |
 |                           |                                             |
 
 | Welche neuen Ideen oder Anforderungen sind aufgekommen? | Was war unklar? Welche Fragen sind aufgetaucht? |
-|---------------------------------------------------------|--------------------------------------------------|
-|                                                         |                                                  |
+| ------------------------------------------------------- | ----------------------------------------------- |
+|                                                         |                                                 |
 
 ---
 
@@ -158,7 +158,7 @@ Nachfrage:
 ## 6. Issues für README
 
 | Ort / Screen | Problem | Ursache / Vermutung | Empfehlung | Schweregrad |
-|--------------|---------|---------------------|------------|-------------|
+| ------------ | ------- | ------------------- | ---------- | ----------- |
 |              |         |                     |            |             |
 |              |         |                     |            |             |
 |              |         |                     |            |             |
