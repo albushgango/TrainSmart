@@ -75,7 +75,7 @@ TrainSmart ist eine **Mobile-First Web-App** mit PWA-Support, die alle Trainings
 
 ## 3. Vorgehen & Artefakte
 
-Die Entwicklung folgte den fünf Phasen der Modul-Methodik. Phasen 1-3 wurden in den Übungsstunden vorbereitet (vgl. [SW9-Abgabe](#71-mockup-aus-sw9)), Phase 4 (Prototype) ist Hauptinhalt der Übungen ab SW10, Phase 5 (Validate) folgt vor der finalen Abgabe.
+Die Entwicklung folgte den fünf Phasen der Modul-Methodik. Phasen 1-3 wurden in den Übungsstunden vorbereitet (vgl. [SW9-Abgabe](#71-mockup-aus-sw9)), Phase 4 (Prototype) ist Hauptinhalt der Übungen ab SW10, Phase 5 (Validate) wurde am 20.05.2026 durchgeführt.
 
 ### 3.1 Understand & Define
 
@@ -335,10 +335,10 @@ Beschreibt die **gestaltete und implementierte App** – nicht das Mockup. An ei
 
 ### 3.5 Validate
 
-Die Usability Evaluation wird in der PT-Kleinklasse am **20.05.2026** durchgeführt und direkt in dieser README dokumentiert. Grundlage sind die Anforderungen aus SW14: getestete Version festhalten, Ziele definieren, Vorgehen beschreiben, Stichprobe dokumentieren, Szenarien ausformulieren, Beobachtungen sammeln, Issues priorisieren und Verbesserungen ableiten.
+Die Usability Evaluation wurde in der PT-Kleinklasse am **20.05.2026** durchgeführt und ist direkt in dieser README dokumentiert. Grundlage waren die Anforderungen aus SW14: getestete Version festhalten, Ziele definieren, Vorgehen beschreiben, Stichprobe dokumentieren, Szenarien ausformulieren, Beobachtungen sammeln, Issues priorisieren und Verbesserungen ableiten.
 
 - **URL der getesteten Version:** [trainsmartv1.netlify.app](https://trainsmartv1.netlify.app)
-- **Zustand der evaluierten Version:** Produktive Netlify-Version am 20.05.2026. Die ausgefüllten Protokolle liegen als Dokumentation zusätzlich unter `docs/usability-evaluation-protokoll_donart_imeri.docx` und `docs/usability-evaluation-protokoll_adi_lama.docx`.
+- **Zustand der evaluierten Version:** Produktive Netlify-Version am 20.05.2026. Die ausgefüllten Protokolle liegen als Dokumentation zusätzlich unter `docs/usability-evaluation-protokoll_donart_imeri.docx` und `docs/usability-evaluation-protokoll_adi_lama.docx`. Die App wurde **nach** der Evaluation weiterentwickelt (siehe Erweiterungen 4.15–4.18); die evaluierte Version entspricht dem Stand vor diesen Änderungen.
 - **Testform:** Moderierter On-site-Test mit Think-Aloud-Methode. Die Testperson bedient den Prototyp selbst und spricht laut aus, was sie erwartet, sucht, versteht oder nicht versteht.
 - **Infrastruktur:** Smartphone oder Notebook mit Browser, stabile Internetverbindung, geöffnete TrainSmart-App, Protokollvorlage/Feedback-Grid.
 - **Zeitbudget:** ca. 10 Minuten pro Testperson, gemäss Übungssetting.
@@ -559,7 +559,7 @@ Die folgenden Erweiterungen wurden über den Mindestumfang der Übungen ab SW8 h
   - [`src/routes/+layout.svelte`](src/routes/+layout.svelte) (URL-Parameter-Auslöser nach Form-Action-Redirects)
 - **Aus Evaluation abgeleitet?:** Nein
 
-### 4.14 Garmin TCX-Import mit erweiterten Lauf-Analysen
+### 4.12 Garmin TCX-Import mit erweiterten Lauf-Analysen
 
 - **Beschreibung & Nutzen:** Komplette Lauf-Activity aus Garmin Connect ohne manuelles Tippen importieren. User exportiert die TCX-Datei aus Garmin Connect (3 Klicks), lädt sie unter `/log/import` hoch. App parsed die Datei, zeigt eine Vorschau mit allen extrahierten Werten, User ergänzt nur RPE / Subtyp / Notiz und klickt "Importieren". Detail-Seite zeigt anschliessend zusätzlich zur normalen Session-Anzeige eine **km-Splits-Tabelle** (Pace pro km als Balken-Visualisierung), einen **HR-Verlaufs-Chart**, einen **Pace-Verlaufs-Chart** (invertiert: unten = schneller) und ein **Höhenprofil**.
 
@@ -595,7 +595,7 @@ Die folgenden Erweiterungen wurden über den Mindestumfang der Übungen ab SW8 h
   - Backend: Aggregations-Logik in [`src/routes/stats/+page.server.js`](src/routes/stats/+page.server.js)
 - **Aus Evaluation abgeleitet?:** Nein, eigene Initiative basierend auf Sport-Profil (Garmin-HRM-Nutzer, Laufintervalle)
 
-### 4.12 Sport-Filter im Trainings-Log
+### 4.14 Sport-Filter im Trainings-Log
 
 - **Beschreibung & Nutzen:** Pill-Leiste oben in `/log`: "Alle / Kraft / Laufen / Rad / Schwimmen". Aktive Pill nimmt die Sport-spezifische Akzentfarbe an. Filter via URL-Parameter (`?sport=Kraft`) → teilbar und reload-stabil.
 - **Wo umgesetzt:**
