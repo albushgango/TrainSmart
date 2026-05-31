@@ -106,6 +106,8 @@ Die Entwicklung folgte den fünf Phasen der Modul-Methodik. Phasen 1-3 wurden in
 
 In SW9 wurden mit der **Crazy-8s-Methode** acht Lösungsvarianten für die Hauptansicht (Tagesempfehlung) skizziert. Die vollständige Skizzen-Sammlung mit handgezeichnetem Original ist im Anhang ([SW9-Abgabe](#71-mockup-aus-sw9)) dokumentiert.
 
+![Handgezeichnete Crazy-8s-Skizzen aus SW9](docs/crazy-8s-sketch.jpeg)
+
 | #   | Variante            | Beschreibung                                                                      |
 | --- | ------------------- | --------------------------------------------------------------------------------- |
 | 1   | Ampel-Karte         | Empfehlung als Ampelfarbe (rot/gelb/grün) mit letzten 3 Tagen darunter            |
@@ -156,7 +158,11 @@ In SW9 wurden mit der **Crazy-8s-Methode** acht Lösungsvarianten für die Haupt
         Liste mit neuer Session: 5: User
   ```
 
-- **Mockup:** Drei-Screen-Flow (Dashboard → Detail → Session loggen) wurde in SW9 ausgearbeitet. Siehe [Anhang 7.1](#71-mockup-aus-sw9) für die handgezeichnete Skizze und die ausgearbeiteten Screens.
+- **Mockup:** Das in SW10 ausgearbeitete UI-Mockup liegt in Figma: **[TrainSmart – UI Mockup SW10](https://www.figma.com/design/RVQ0oce2SmIBvRvHFZyC7u/TrainSmart-%E2%80%93-UI-Mockup-SW10?node-id=17-2)**. Es umfasst sechs Screens (Dashboard, Tagesdetail, Session loggen, Trainings-Log, Wochenplaner, Statistiken). Die handgezeichnete Vorstufe (Crazy-8s) ist in [Anhang 7.1](#71-mockup-aus-sw9) dokumentiert.
+
+![TrainSmart UI-Mockup (SW10, Figma)](docs/mockup-sw10.png)
+
+_Low-Fidelity-Mockup aus SW10. Einige Konzepte wurden in der Umsetzung bewusst angepasst – u. a. wurde "Wochenplaner" zu "Profil" und der numerische "Load Score" zu einer kategorischen Empfehlung auf RPE-Basis (siehe Designentscheidungen in Kap. 3.4.1)._
 
 ### 3.4 Prototype
 
@@ -772,13 +778,7 @@ KI hat den Entwicklungs-Aufwand massiv reduziert und mir erlaubt, in kurzer Zeit
 
 ### 7.1 Mockup aus SW9
 
-Das vollständige SW9-Abgabe-Dokument mit Crazy-8s-Skizzen, Dot-Voting, Reflexion und ausgearbeitetem 3-Screen-Flow findet sich unter:
-
-```
-SW9_Abgabe_TrainSmart.pdf
-```
-
-(Im Repo unter `docs/`, falls hochgeladen, sonst in der separaten Moodle-Abgabe verlinkt.)
+Das vollständige SW9-Abgabe-Dokument mit Crazy-8s-Skizzen, Dot-Voting, Reflexion und ausgearbeitetem 3-Screen-Flow liegt im Repo unter [`docs/SW9_Abgabe_TrainSmart.pdf`](docs/SW9_Abgabe_TrainSmart.pdf). Das daraus in SW10 ausgearbeitete UI-Mockup liegt in Figma: **[TrainSmart – UI Mockup SW10](https://www.figma.com/design/RVQ0oce2SmIBvRvHFZyC7u/TrainSmart-%E2%80%93-UI-Mockup-SW10?node-id=17-2)** (Screenshot in Kap. 3.3).
 
 **Kurzfassung:**
 
