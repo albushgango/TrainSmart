@@ -433,15 +433,20 @@ Die Szenario-Tests zeigen, dass die Kernworkflows grundsätzlich funktionieren: 
 
 #### 3.5.8 Abgeleitete Verbesserungen
 
-Aus der Evaluation ergeben sich folgende priorisierte Verbesserungen:
+Aus der Evaluation wurden die folgenden Verbesserungen abgeleitet und priorisiert. Die hoch priorisierten Punkte sowie zwei weitere wurden **nach der Evaluation umgesetzt** (Details in Kapitel 4); die übrigen sind als GitHub-Issues für die nächste Iteration festgehalten.
 
-1. **Tagesempfehlung klickbar und handlungsorientiert machen (hoch):** Klick auf "Heavy/Light/Rest" soll zu einem konkreten Trainingsvorschlag führen.
-2. **Automatische Gym-Workout-Vorschläge ergänzen (hoch):** Basierend auf Wochenziel und aktivem Split sollen passende Übungen vorgeschlagen werden, inklusive kurzer Vorschau und Standardwerten.
-3. **Live-Workout-Modus prüfen (mittel):** Neben dem Nachtragen soll ein Training aktiv gestartet werden können, damit Sets, Wiederholungen und Gewicht während dem Gym erfasst werden.
-4. **Stats interaktiver machen (mittel):** Aktivitäts-Punkte und relevante Statistik-Elemente sollen direkt zur passenden Session führen.
-5. **Responsive Layout verbessern (mittel):** Auf Laptop und Tablet soll die App den verfügbaren Platz besser nutzen.
-6. **Unfertige Sportarten reduzieren oder kennzeichnen (tief):** Rad und Schwimmen sollen entweder klarer ausgebaut oder vorübergehend weniger prominent angezeigt werden.
-7. **Spätere Erweiterungen sammeln (tief):** Körpergewicht und Kalorien-Tracking als mögliche Zukunftsfunktionen dokumentieren.
+**✅ Nach der Evaluation umgesetzt:**
+
+1. **Tagesempfehlung klickbar und handlungsorientiert (hoch):** Klick auf die Empfehlung führt zu einem konkret vorbereiteten Training (siehe Kap. 4.15).
+2. **Automatische Gym-Workout-Vorschläge (hoch):** Übungen werden passend zum aktiven Split vorgeschlagen (siehe Kap. 4.16).
+3. **Live-Workout-Modus (mittel):** Training aktiv starten und Sets während dem Gym abhaken (siehe Kap. 4.17).
+4. **Unfertige Sportarten zurückgenommen (tief):** Erfassung vorerst auf Kraft & Laufen fokussiert (siehe Kap. 4.18).
+
+**🔜 Für die nächste Iteration festgehalten (als GitHub-Issues):**
+
+5. **Stats interaktiver machen (mittel):** Aktivitäts-Punkte sollen direkt zur passenden Session führen.
+6. **Responsive Layout verbessern (mittel):** Auf Laptop und Tablet soll die App den verfügbaren Platz besser nutzen.
+7. **Spätere Erweiterungen sammeln (tief):** Körpergewicht- und Kalorien-Tracking als mögliche Zukunftsfunktionen.
 
 Bereits vor der formalen Evaluation aus eigenem Testen umgesetzt:
 
@@ -597,6 +602,46 @@ Die folgenden Erweiterungen wurden über den Mindestumfang der Übungen ab SW8 h
   - Backend: [`src/routes/log/+page.server.js`](src/routes/log/+page.server.js) (URL-Parameter-Validierung + MongoDB-Query)
   - Frontend: [`src/routes/log/+page.svelte`](src/routes/log/+page.svelte) (Filter-Pills)
 - **Aus Evaluation abgeleitet?:** Nein
+
+---
+
+> Die folgenden vier Erweiterungen (4.15–4.18) wurden **nach** der Usability-Evaluation umgesetzt und gehen direkt auf die dort identifizierten Issues zurück (vgl. Kapitel 3.5.6 Issue Map und 3.5.8 Abgeleitete Verbesserungen).
+
+### 4.15 Klickbare, handlungsorientierte Tagesempfehlung
+
+- **Beschreibung & Nutzen:** Die Empfehlungs-Card auf dem Dashboard ist nicht mehr nur Information. Bei "Heavy"/"Light" zeigt sie einen Aktions-Button ("[Split-Tag] vorbereiten →"), der direkt zur Session-Erfassung führt – mit vorausgewähltem Sport (Kraft) und dem nächsten Split-Tag als Subtyp. Aus der Tagesentscheidung wird so in einem Klick ein konkret vorbereitetes Training. Bei "Rest"/"Erledigt" wird kein Button gezeigt.
+- **Wo umgesetzt:**
+  - Frontend: [`src/routes/+page.svelte`](src/routes/+page.svelte) (`empfehlungHref`, `kannTrainingVorbereiten`, Aktions-Button in der Empfehlungs-Card)
+  - Backend: [`src/routes/+page.server.js`](src/routes/+page.server.js) (`berechneEmpfehlung` liefert `naechsterTag`), [`src/routes/log/new/+page.server.js`](src/routes/log/new/+page.server.js) (Übernahme der Parameter `sport`/`subtyp`/`quelle`)
+- **Referenz:** Issue "Dashboard / Tagesempfehlung" (Priorität hoch) in Kap. 3.5.6
+- **Aus Evaluation abgeleitet?:** Ja – höchstpriorisiertes Issue (insb. TP2 Adi Lama).
+
+### 4.16 Split-basierte Workout-Vorschläge
+
+- **Beschreibung & Nutzen:** Beim Erfassen einer Kraft-Session schlägt die App passend zum gewählten Subtyp (Split-Tag) automatisch konkrete Übungen vor. Per Klick werden sie als Workout mit Standard-Sätzen übernommen, statt jede Übung einzeln zu suchen – deutlich schnellerer Einstieg ins Logging.
+- **Wo umgesetzt:**
+  - Logik: [`src/lib/uebungen.js`](src/lib/uebungen.js) (`workoutVorschlagFuer(subtyp)`)
+  - Frontend: [`src/routes/log/new/+page.svelte`](src/routes/log/new/+page.svelte) (`workoutVorschlag`, `workoutVorschlagUebernehmen()`)
+- **Referenz:** Issue "Neue Session / Krafttraining" (Priorität hoch) in Kap. 3.5.6
+- **Aus Evaluation abgeleitet?:** Ja.
+
+### 4.17 Live-Workout-Modus
+
+- **Beschreibung & Nutzen:** Optionaler "Training starten"-Modus: Statt nur nachzutragen, kann ein Training aktiv begleitet werden. Pro Übung werden Sets angezeigt, die man während dem Gym abhakt (✓) und mit Gewicht/Wiederholungen füllt; nach jedem erledigten Set startet ein Pausen-Timer. Gespeichert werden die erledigten Sets (das schwerste Set als Referenzwert plus eine Live-Sets-Notiz).
+- **Wo umgesetzt:**
+  - Frontend: [`src/routes/log/new/+page.svelte`](src/routes/log/new/+page.svelte) (Live-Sets, Set abhaken, Pausen-Timer)
+  - Backend: [`src/routes/log/new/+page.server.js`](src/routes/log/new/+page.server.js) (Verarbeitung der Sets, schwerstes Set, Live-Sets-Notiz)
+- **Referenz:** Issue "Neue Session / Gym-Workflow" (Priorität mittel) in Kap. 3.5.6
+- **Aus Evaluation abgeleitet?:** Ja – Wunsch von TP2 (sehr aktiver Gym-Nutzer).
+
+### 4.18 Fokus auf ausgebaute Sportarten (Kraft & Laufen)
+
+- **Beschreibung & Nutzen:** Rad und Schwimmen wurden in den Erfassungs-Flows zurückgenommen, solange sie nicht vollständig ausgebaut sind. Beim Loggen sind nur noch Kraft und Laufen aktiv; eine klare Meldung erklärt, dass Rad/Schwimmen später ergänzt werden. Das beseitigt die im Test bemängelte Erwartungs-Lücke ("sieht ausgebaut aus, ist es aber nicht").
+- **Wo umgesetzt:**
+  - Backend: [`src/routes/log/new/+page.server.js`](src/routes/log/new/+page.server.js) (`AKTIVE_SPORTARTEN`-Whitelist + erklärende Fehlermeldung)
+  - Frontend: [`src/routes/log/new/+page.svelte`](src/routes/log/new/+page.svelte) (Sport-Auswahl)
+- **Referenz:** Issue "Loggen / Sportarten" (Priorität tief) in Kap. 3.5.6
+- **Aus Evaluation abgeleitet?:** Ja.
 
 ---
 
