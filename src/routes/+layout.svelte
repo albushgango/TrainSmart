@@ -34,7 +34,9 @@
 </script>
 
 <main class="app-content">
-	{@render children()}
+	<div class="content-wrap">
+		{@render children()}
+	</div>
 </main>
 
 <Toast />
@@ -300,6 +302,12 @@
 		.app-content {
 			padding-bottom: 0;
 			padding-left: 96px;
+		}
+
+		/* Inhalt auf grossen Screens zentrieren statt voll-breit dehnen */
+		.content-wrap {
+			max-width: 860px;
+			margin: 0 auto;
 		}
 
 		.bottom-nav {
