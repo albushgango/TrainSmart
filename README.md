@@ -682,7 +682,7 @@ Die folgenden Erweiterungen wurden über den Mindestumfang der Übungen ab SW8 h
   - GitHub: [albushgango/TrainSmart](https://github.com/albushgango/TrainSmart) (öffentlich)
   - Strukturübersicht siehe Kapitel [3.4.2](#342-umsetzung-technik) "Struktur & Komponenten"
 
-- **Issue-Management:** Während der Entwicklung wurden Issues vorerst direkt in den Cowork-Sessions besprochen und sofort gefixt. Vor finaler Abgabe werden für nicht umgesetzte Erweiterungen (z.B. Pace-Tracking-Idee, Workout-Timer) GitHub-Issues angelegt, um die Entscheidungen sichtbar zu machen.
+- **Issue-Management:** Die in der Usability-Evaluation (Kap. 3.5.6) identifizierten Probleme sind als [**GitHub-Issues**](https://github.com/albushgango/TrainSmart/issues?q=is%3Aissue) festgehalten – mit Labels für Herkunft (`usability-evaluation`) und Priorität (`prio: hoch/mittel/tief`). Die nach der Evaluation umgesetzten Punkte (Erweiterungen 4.15–4.18) sind als **geschlossene** Issues dokumentiert, die noch offenen (z.B. responsives Layout, anklickbare Aktivitäts-Punkte) als **offene** Issues für die nächste Iteration. So bleibt der Weg von der Beobachtung bis zur Umsetzung nachvollziehbar.
 
 - **Commit-Praxis:** Conventional-Commit-Stil mit deutschen Beschreibungs-Texten:
   - `feat:` für neue Features
