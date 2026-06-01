@@ -564,6 +564,7 @@
 							{#each uebungsFortschritt as uebung (uebung.name)}
 								{@const istOffen = offeneUebung === uebung.name}
 								{@const spark = sparklineDaten(uebung.eintraege, 64, 22)}
+								{@const istBodyweight = uebung.max === 0}
 								<div class="fortschritt-item">
 									<button
 										class="fi-zeile"
@@ -573,7 +574,8 @@
 										<div class="fi-info">
 											<span class="fi-name">{uebung.name}</span>
 											<span class="fi-meta">
-												{uebung.eintraege.length} Einträge · Max {uebung.max} kg
+												{uebung.eintraege.length} Einträge{#if !istBodyweight}
+													· Max {uebung.max} kg{/if}
 											</span>
 										</div>
 
@@ -607,8 +609,14 @@
 										{/if}
 
 										<div class="fi-rechts">
-											<span class="fi-aktuell">{uebung.aktuell.gewicht} kg</span>
-											{#if uebung.trend !== null}
+											<span class="fi-aktuell"
+												>{istBodyweight
+													? `${uebung.aktuell.saetze}×${uebung.aktuell.wiederholungen}`
+													: `${uebung.aktuell.gewicht} kg`}</span
+											>
+											{#if istBodyweight}
+												<span class="fi-trend">Körpergewicht</span>
+											{:else if uebung.trend !== null}
 												<span
 													class="fi-trend"
 													class:plus={uebung.trend > 0}
