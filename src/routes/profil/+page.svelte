@@ -238,7 +238,7 @@
 		color: var(--accent);
 		font-size: 1.4rem;
 		font-weight: 800;
-		width: 50px;
+		width: 72px;
 		text-align: center;
 		padding: 0.3rem 0;
 		font-family: inherit;
