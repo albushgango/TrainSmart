@@ -1567,53 +1567,6 @@
 		color: var(--text-tertiary);
 	}
 
-	.top-uebungen h3 {
-		margin: 0 0 0.7rem;
-		font-size: 0.85rem;
-		font-weight: 700;
-		color: var(--text-secondary);
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-	}
-
-	.uebungen-records {
-		display: flex;
-		flex-direction: column;
-		gap: 0.55rem;
-	}
-
-	.uebung-record {
-		display: flex;
-		justify-content: space-between;
-		align-items: center;
-		padding: 0.55rem 0.75rem;
-		background: var(--bg-input);
-		border-radius: 8px;
-	}
-
-	.ur-name {
-		font-weight: 600;
-		color: var(--text-primary);
-		font-size: 0.9rem;
-	}
-
-	.ur-werte {
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
-	}
-
-	.ur-werte strong {
-		color: var(--accent);
-		font-weight: 800;
-		font-size: 0.95rem;
-	}
-
-	.ur-detail {
-		color: var(--text-tertiary);
-		font-size: 0.78rem;
-	}
-
 	/* Stacked Bar */
 	.stacked-bar {
 		display: flex;
