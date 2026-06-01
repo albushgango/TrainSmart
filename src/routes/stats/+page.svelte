@@ -12,13 +12,26 @@
 		{ wochen: 8, label: '8 Wochen' }
 	];
 
-	// Wochenload auf den gewählten Zeitraum zuschneiden (letzte N der 8 Buckets)
-	const wochenLoad = $derived(data.wochenLoad.slice(-zeitraum));
-	const sichtbareWochenKeys = $derived(new Set(wochenLoad.map((w) => w.key)));
-	// Sessions, die in den angezeigten Wochen liegen → Basis für Totals + Sport-Verteilung
-	const sessionsImZeitraum = $derived(
-		data.uebersichtSessions.filter((s) => sichtbareWochenKeys.has(s.wochenKey))
-	);
+	// Chart-Daten: "Letzte Woche" → 7 Tagesbalken (aus Heatmap-Tagesdaten), sonst Wochenbalken
+	const WOCHENTAGE = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'];
+	const chartDaten = $derived.by(() => {
+		if (zeitraum === 1) {
+			return heatmapTage.slice(-7).map((t) => ({ label: WOCHENTAGE[t.wochentag], load: t.load }));
+		}
+		return data.wochenLoad.slice(-zeitraum).map((w) => ({ label: w.label, load: w.load }));
+	});
+
+	// Sessions im Zeitraum → Basis für Totals + Sport-Verteilung
+	const sessionsImZeitraum = $derived.by(() => {
+		if (zeitraum === 1) {
+			const grenze = new Date();
+			grenze.setHours(0, 0, 0, 0);
+			grenze.setDate(grenze.getDate() - 6); // letzte 7 Kalendertage inkl. heute
+			return data.uebersichtSessions.filter((s) => new Date(s.datum) >= grenze);
+		}
+		const keys = new Set(data.wochenLoad.slice(-zeitraum).map((w) => w.key));
+		return data.uebersichtSessions.filter((s) => keys.has(s.wochenKey));
+	});
 
 	const totals = $derived.by(() => {
 		const n = sessionsImZeitraum.length;
@@ -237,7 +250,7 @@
 	};
 
 	// Maximaler Load über alle Wochen (für Bar-Chart Skalierung)
-	const maxLoad = $derived(Math.max(...wochenLoad.map((w) => w.load), 1));
+	const maxLoad = $derived(Math.max(...chartDaten.map((d) => d.load), 1));
 
 	// Total-Minuten für Sport-Prozentanteile
 	const totalSportMinuten = $derived(sportVerteilung.reduce((sum, s) => sum + s.minuten, 0));
@@ -246,7 +259,7 @@
 	const chartWidth = 320;
 	const chartHeight = 140;
 	const barGap = 8;
-	const barWidth = $derived((chartWidth - barGap * (wochenLoad.length - 1)) / wochenLoad.length);
+	const barWidth = $derived((chartWidth - barGap * (chartDaten.length - 1)) / chartDaten.length);
 
 	function balkenHoehe(load) {
 		return load === 0 ? 4 : Math.max(6, (load / maxLoad) * chartHeight);
@@ -326,9 +339,9 @@
 			<!-- Wochenload-Chart -->
 			<section class="chart-section">
 				<div class="section-header">
-					<h2>Wochenload</h2>
+					<h2>{zeitraum === 1 ? 'Tagesload' : 'Wochenload'}</h2>
 					<span class="section-sub"
-						>{zeitraum === 1 ? 'letzte Woche' : `letzte ${zeitraum} Wochen`}</span
+						>{zeitraum === 1 ? 'letzte 7 Tage' : `letzte ${zeitraum} Wochen`}</span
 					>
 				</div>
 
@@ -341,8 +354,8 @@
 						preserveAspectRatio="xMidYMid meet"
 					>
 						<!-- Bars -->
-						{#each wochenLoad as woche, i}
-							{@const h = balkenHoehe(woche.load)}
+						{#each chartDaten as d, i}
+							{@const h = balkenHoehe(d.load)}
 							{@const x = i * (barWidth + barGap)}
 							{@const y = chartHeight - h}
 							<!-- Glow-Effekt durch zweiten Balken mit blur -->
@@ -354,7 +367,7 @@
 								rx="3"
 								ry="3"
 								fill="var(--accent)"
-								opacity={woche.load === 0 ? 0.15 : 0.25}
+								opacity={d.load === 0 ? 0.15 : 0.25}
 								filter="blur(6px)"
 							/>
 							<rect
@@ -365,7 +378,7 @@
 								rx="3"
 								ry="3"
 								fill="var(--accent)"
-								opacity={woche.load === 0 ? 0.3 : 1}
+								opacity={d.load === 0 ? 0.3 : 1}
 							/>
 							<text
 								x={x + barWidth / 2}
@@ -373,13 +386,13 @@
 								text-anchor="middle"
 								font-size="9"
 								fill="var(--text-tertiary)"
-								font-weight="600">{woche.label}</text
+								font-weight="600">{d.label}</text
 							>
 						{/each}
 					</svg>
 
 					<div class="chart-legende">
-						<span>Load = Dauer × RPE pro Woche</span>
+						<span>Load = Dauer × RPE pro {zeitraum === 1 ? 'Tag' : 'Woche'}</span>
 					</div>
 				</div>
 			</section>
