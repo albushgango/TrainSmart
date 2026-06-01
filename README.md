@@ -193,6 +193,31 @@ Beschreibt die **gestaltete und implementierte App** – nicht das Mockup. An ei
   - **Session loggen**: Sport-Pills, Subtyp-Pills (sport-abhängig), Quick-Date-Pills (Heute/Gestern/Vorgestern), Combobox für Übungen mit gruppierten Vorschlägen
   - **Statistiken**: Tab-Navigation mit Lime-Underline, SVG-Charts (Bar-Chart, Heatmap, Linien-Chart, Mini-Sparklines)
 
+  **Screenshots der Live-App** (iPhone, produktive Netlify-Version):
+
+<table>
+  <tr>
+    <td width="33%"><img src="docs/screenshots/01-dashboard.jpeg" alt="Dashboard"><br><sub><b>Dashboard</b> – Tagesempfehlung mit Aktions-Button, Wochenkalender, Streak, Wochenziel</sub></td>
+    <td width="33%"><img src="docs/screenshots/02-session-neu.jpeg" alt="Session loggen"><br><sub><b>Session loggen</b> – Sport-/Subtyp-Pills, Quick-Date, Vorschlag „Lower laut Split"</sub></td>
+    <td width="33%"><img src="docs/screenshots/03-workout-vorschlag.jpeg" alt="Workout-Vorschlag"><br><sub><b>Split-Workout-Vorschlag</b> (4.16) – 5 passende Übungen, per Klick übernehmbar</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/04-live-workout.jpeg" alt="Live-Workout-Modus"><br><sub><b>Live-Workout-Modus</b> (4.17) – Sätze abhaken + Pausen-Timer während dem Training</sub></td>
+    <td><img src="docs/screenshots/05-log-filter.jpeg" alt="Trainings-Log"><br><sub><b>Trainings-Log</b> – Sessions-Liste mit Sportart-Filter (hier: Kraft)</sub></td>
+    <td><img src="docs/screenshots/09-lauf-detail.jpeg" alt="Lauf-Detail"><br><sub><b>Lauf-Detail</b> (4.12/4.13) – Pace, HF, Kalorien, Watts, Höhenmeter aus TCX-Import</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/10-lauf-analyse.jpeg" alt="Lauf-Analyse"><br><sub><b>Lauf-Analyse</b> (4.12) – km-Splits, Intervall-Erkennung, HR-Zonen</sub></td>
+    <td><img src="docs/screenshots/06-stats-uebersicht.jpeg" alt="Statistiken Übersicht"><br><sub><b>Stats · Übersicht</b> – Total-Werte, Wochenload-Chart, Sport-Verteilung</sub></td>
+    <td><img src="docs/screenshots/07-stats-fortschritt.jpeg" alt="Statistiken Fortschritt"><br><sub><b>Stats · Fortschritt</b> (4.7) – Personal Records + Gewichts-Verlauf je Übung</sub></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/08-profil.jpeg" alt="Profil"><br><sub><b>Profil</b> – Wochenziel, HR-Zonen (Basis für TCX-Analyse), Trainings-Split</sub></td>
+    <td></td>
+    <td></td>
+  </tr>
+</table>
+
 - **Designentscheidungen:**
 
   | Entscheidung                              | Begründung                                                                                                                                                                                        |
