@@ -2,15 +2,45 @@
 	import { formatZonenZeit } from '$lib/hrZonen.js';
 
 	let { data } = $props();
-	const {
-		totals,
-		wochenLoad,
-		sportVerteilung,
-		recordsProSport,
-		uebungsFortschritt,
-		heatmapTage,
-		laufFortschritt
-	} = data;
+	const { recordsProSport, uebungsFortschritt, heatmapTage, laufFortschritt } = data;
+
+	// Zeitraum-Filter für die gesamte Übersicht (Wochen)
+	let zeitraum = $state(8);
+	const ZEITRAEUME = [
+		{ wochen: 1, label: 'Letzte Woche' },
+		{ wochen: 4, label: '4 Wochen' },
+		{ wochen: 8, label: '8 Wochen' }
+	];
+
+	// Wochenload auf den gewählten Zeitraum zuschneiden (letzte N der 8 Buckets)
+	const wochenLoad = $derived(data.wochenLoad.slice(-zeitraum));
+	const sichtbareWochenKeys = $derived(new Set(wochenLoad.map((w) => w.key)));
+	// Sessions, die in den angezeigten Wochen liegen → Basis für Totals + Sport-Verteilung
+	const sessionsImZeitraum = $derived(
+		data.uebersichtSessions.filter((s) => sichtbareWochenKeys.has(s.wochenKey))
+	);
+
+	const totals = $derived.by(() => {
+		const n = sessionsImZeitraum.length;
+		const minuten = sessionsImZeitraum.reduce((sum, s) => sum + s.dauer, 0);
+		const rpe = n ? sessionsImZeitraum.reduce((sum, s) => sum + s.rpe, 0) / n : 0;
+		return {
+			sessions: n,
+			stunden: Math.round((minuten / 60) * 10) / 10,
+			avgRpe: Math.round(rpe * 10) / 10
+		};
+	});
+
+	const sportVerteilung = $derived.by(() => {
+		const m = new Map();
+		for (const s of sessionsImZeitraum) {
+			const a = m.get(s.sport) || { sport: s.sport, minuten: 0, sessions: 0 };
+			a.minuten += s.dauer;
+			a.sessions += 1;
+			m.set(s.sport, a);
+		}
+		return [...m.values()].sort((a, b) => b.minuten - a.minuten);
+	});
 
 	function formatKurzes(iso) {
 		return new Date(iso).toLocaleDateString('de-CH', {
@@ -207,16 +237,16 @@
 	};
 
 	// Maximaler Load über alle Wochen (für Bar-Chart Skalierung)
-	const maxLoad = Math.max(...wochenLoad.map((w) => w.load), 1);
+	const maxLoad = $derived(Math.max(...wochenLoad.map((w) => w.load), 1));
 
 	// Total-Minuten für Sport-Prozentanteile
-	const totalSportMinuten = sportVerteilung.reduce((sum, s) => sum + s.minuten, 0);
+	const totalSportMinuten = $derived(sportVerteilung.reduce((sum, s) => sum + s.minuten, 0));
 
 	// SVG Chart-Dimensionen
 	const chartWidth = 320;
 	const chartHeight = 140;
 	const barGap = 8;
-	const barWidth = (chartWidth - barGap * (wochenLoad.length - 1)) / wochenLoad.length;
+	const barWidth = $derived((chartWidth - barGap * (wochenLoad.length - 1)) / wochenLoad.length);
 
 	function balkenHoehe(load) {
 		return load === 0 ? 4 : Math.max(6, (load / maxLoad) * chartHeight);
@@ -266,6 +296,17 @@
 		</div>
 
 		{#if aktiverTab === 'uebersicht'}
+			<!-- Zeitraum-Filter für die ganze Übersicht -->
+			<div class="zeitraum-pills" role="group" aria-label="Zeitraum">
+				{#each ZEITRAEUME as z}
+					<button
+						class="zeitraum-pill"
+						class:aktiv={zeitraum === z.wochen}
+						onclick={() => (zeitraum = z.wochen)}>{z.label}</button
+					>
+				{/each}
+			</div>
+
 			<!-- Total-Stats Hero -->
 			<section class="total-stats">
 				<div class="stat-card">
@@ -286,11 +327,14 @@
 			<section class="chart-section">
 				<div class="section-header">
 					<h2>Wochenload</h2>
-					<span class="section-sub">letzte 8 Wochen</span>
+					<span class="section-sub"
+						>{zeitraum === 1 ? 'letzte Woche' : `letzte ${zeitraum} Wochen`}</span
+					>
 				</div>
 
 				<div class="chart-card">
 					<svg
+						class="load-chart"
 						viewBox="0 0 {chartWidth} {chartHeight + 24}"
 						width="100%"
 						height="auto"
@@ -1067,6 +1111,41 @@
 		border: 1px solid var(--border);
 		border-radius: var(--radius-lg);
 		padding: 1.1rem;
+	}
+
+	/* Wochenload-SVG: Höhe deckeln, sonst skaliert es auf breiten Screens zu hoch */
+	.load-chart {
+		display: block;
+		width: 100%;
+		height: auto;
+		max-height: 220px;
+		margin: 0 auto;
+	}
+
+	/* Zeitraum-Auswahl der Übersicht */
+	.zeitraum-pills {
+		display: flex;
+		gap: 0.5rem;
+		margin-bottom: 1rem;
+	}
+
+	.zeitraum-pill {
+		flex: 1;
+		padding: 0.5rem 0.75rem;
+		border-radius: 999px;
+		border: 1px solid var(--border);
+		background: var(--bg-card);
+		color: var(--text-secondary);
+		font-size: 0.8rem;
+		font-weight: 600;
+		cursor: pointer;
+		transition: all 0.15s ease;
+	}
+
+	.zeitraum-pill.aktiv {
+		background: var(--accent);
+		border-color: var(--accent);
+		color: #0a0e14;
 	}
 
 	.chart-legende {

@@ -48,9 +48,10 @@ export async function load() {
 	const avgRpe =
 		totalSessions > 0 ? alleSessions.reduce((sum, s) => sum + (s.rpe || 0), 0) / totalSessions : 0;
 
-	// Wochenload-Chart: letzte 8 Wochen
+	// Wochenload-Chart: letzte 8 Wochen + leichte Session-Liste für die zeitraum-reaktive Übersicht
 	const wochen = letzteNWochen(8);
 	const wochenMap = new Map(wochen.map((w) => [w.key, w]));
+	const uebersichtSessions = [];
 
 	alleSessions.forEach((s) => {
 		const { jahr, woche } = isoWoche(new Date(s.datum));
@@ -59,6 +60,13 @@ export async function load() {
 		if (eintrag) {
 			eintrag.load += (s.dauer || 0) * (s.rpe || 0);
 			eintrag.sessions += 1;
+			uebersichtSessions.push({
+				datum: s.datum.toISOString(),
+				dauer: s.dauer || 0,
+				rpe: s.rpe || 0,
+				sport: s.sport,
+				wochenKey: key
+			});
 		}
 	});
 
@@ -260,6 +268,7 @@ export async function load() {
 			avgRpe: Math.round(avgRpe * 10) / 10
 		},
 		wochenLoad: wochen,
+		uebersichtSessions,
 		sportVerteilung,
 		heatmapTage,
 		recordsProSport,
