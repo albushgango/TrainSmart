@@ -570,7 +570,11 @@
 		<p class="error">{form.error}</p>
 	{/if}
 
-	<form method="POST" onsubmit={() => (wirdGespeichert = true)}>
+	<form
+		method="POST"
+		class:form-fokus={liveTrackingAktiv}
+		onsubmit={() => (wirdGespeichert = true)}
+	>
 		{#if kamVonEmpfehlung}
 			<div class="coach-hinweis">
 				<span class="coach-label">Aus deiner Tagesempfehlung</span>
@@ -1331,6 +1335,35 @@
 		color: var(--text-primary);
 		font-size: 1rem;
 		font-weight: 850;
+	}
+
+	/* Fokus-Modus: Live-Training als ablenkungsfreie Vollbild-Ansicht */
+	.form-fokus {
+		position: fixed;
+		inset: 0;
+		z-index: 1000;
+		margin: 0;
+		padding: 1.1rem 1.1rem 2rem;
+		background: var(--bg-primary);
+		overflow-y: auto;
+	}
+
+	.form-fokus .form-grid {
+		display: flex;
+		flex-direction: column;
+		gap: 1rem;
+		max-width: 680px;
+		margin: 0 auto;
+	}
+
+	.form-fokus .basis-panel,
+	.form-fokus .coach-hinweis,
+	.form-fokus .vorschlag-spalte {
+		display: none;
+	}
+
+	.form-fokus .trainings-grid {
+		display: block;
 	}
 
 	.basis-grid,
