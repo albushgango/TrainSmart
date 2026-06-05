@@ -1,6 +1,6 @@
 <script>
 	let { data } = $props();
-	const { empfehlung, streak, letzteSessions, wochenziel, wochenTage, wochenSessions } = data;
+	const { empfehlung, letzteSessions, wochenziel, wochenTage, wochenSessions } = data;
 
 	const sportEmoji = {
 		Kraft: '🏋️',
@@ -71,16 +71,6 @@
 			<p class="gruss">{begruessung}</p>
 			<h1>DASHBOARD</h1>
 		</div>
-		{#if streak > 0}
-			<div
-				class="streak-badge"
-				title="{streak} {streak === 1 ? 'Woche' : 'Wochen'} in Folge mit mindestens einem Training"
-			>
-				<span class="streak-fire">🔥</span>
-				<span class="streak-zahl">{streak}</span>
-				<span class="streak-label">{streak === 1 ? 'Woche' : 'Wochen'}</span>
-			</div>
-		{/if}
 	</header>
 
 	<div class="dashboard-grid">
@@ -259,48 +249,6 @@
 		letter-spacing: 0.02em;
 		color: var(--text-primary);
 		text-transform: uppercase;
-	}
-
-	/* Streak Badge — kompakt: Flame + Zahl horizontal */
-	.streak-badge {
-		display: flex;
-		align-items: center;
-		gap: 0.35rem;
-		background: var(--bg-card);
-		border: 1px solid var(--border);
-		border-radius: 999px;
-		padding: 0.4rem 0.85rem;
-	}
-
-	.streak-fire {
-		font-size: 1rem;
-		animation: streak-puls 2.4s ease-in-out infinite;
-	}
-
-	@keyframes streak-puls {
-		0%,
-		100% {
-			transform: scale(1);
-		}
-		50% {
-			transform: scale(1.18);
-			filter: drop-shadow(0 0 6px rgba(249, 115, 22, 0.7));
-		}
-	}
-
-	.streak-label {
-		font-size: 0.66rem;
-		font-weight: 700;
-		text-transform: uppercase;
-		letter-spacing: 0.06em;
-		color: var(--text-secondary);
-		line-height: 1;
-	}
-	.streak-zahl {
-		font-size: 1.05rem;
-		font-weight: 800;
-		color: var(--text-primary);
-		line-height: 1;
 	}
 
 	/* Wochenkalender — 7 Pills mit Wochentag, Datum, Aktivitätspunkt */
