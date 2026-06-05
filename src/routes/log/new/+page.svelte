@@ -2902,21 +2902,24 @@
 		}
 
 		.basis-grid {
-			grid-template-columns: minmax(320px, 1.25fr) minmax(260px, 1fr) minmax(230px, 0.85fr);
-			gap: 0.9rem 1rem;
+			grid-template-columns: 1fr 1fr;
+			gap: 0.9rem 1.4rem;
 			align-items: start;
 		}
 
 		.sport-block {
-			grid-column: span 1;
+			grid-column: 1;
+			grid-row: 1;
 		}
 
 		.split-block {
-			grid-column: span 1;
+			grid-column: 1;
+			grid-row: 2;
 		}
 
 		.zeit-block {
-			grid-column: span 1;
+			grid-column: 2;
+			grid-row: 1 / 3;
 		}
 
 		.lauf-block,
