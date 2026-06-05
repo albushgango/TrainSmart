@@ -189,7 +189,7 @@ Beschreibt die **gestaltete und implementierte App** – nicht das Mockup. An ei
   Dark-Theme mit Lime-Akzentfarbe und sport-spezifischen Highlights (Kraft=Rot, Laufen=Lime, Rad=Cyan, Schwimmen=Blau). ALL-CAPS-Headers, klare Tab-Navigation, subtile Glow-Effekte für aktive Zustände.
 
   **Wichtige Screens:**
-  - **Dashboard**: ALL-CAPS-Header ("DASHBOARD"), Streak-Pill oben rechts, klickbarer Wochenkalender (7 Pills mit Aktivitäts-Punkten), Empfehlungs-Card mit farbigem Glow, Wochenziel-Fortschrittsbalken, Tag-spezifische Sessions-Liste
+  - **Dashboard**: ALL-CAPS-Header ("DASHBOARD"), klickbarer Wochenkalender (7 Pills mit Aktivitäts-Punkten), Empfehlungs-Card mit farbigem Glow, Wochenziel-Fortschrittsbalken, Tag-spezifische Sessions-Liste
   - **Session loggen**: Sport-Pills, Subtyp-Pills (sport-abhängig), Quick-Date-Pills (Heute/Gestern/Vorgestern), Combobox für Übungen mit gruppierten Vorschlägen
   - **Statistiken**: Tab-Navigation mit Lime-Underline, SVG-Charts (Bar-Chart, Heatmap, Linien-Chart, Mini-Sparklines)
 
@@ -197,7 +197,7 @@ Beschreibt die **gestaltete und implementierte App** – nicht das Mockup. An ei
 
 <table>
   <tr>
-    <td width="33%"><img src="docs/screenshots/01-dashboard.jpeg" alt="Dashboard"><br><sub><b>Dashboard</b> – Tagesempfehlung mit Aktions-Button, Wochenkalender, Streak, Wochenziel</sub></td>
+    <td width="33%"><img src="docs/screenshots/01-dashboard.jpeg" alt="Dashboard"><br><sub><b>Dashboard</b> – Tagesempfehlung mit Aktions-Button, Wochenkalender, Wochenziel</sub></td>
     <td width="33%"><img src="docs/screenshots/02-session-neu.jpeg" alt="Session loggen"><br><sub><b>Session loggen</b> – Sport-/Subtyp-Pills, Quick-Date, Vorschlag „Lower laut Split"</sub></td>
     <td width="33%"><img src="docs/screenshots/03-workout-vorschlag.jpeg" alt="Workout-Vorschlag"><br><sub><b>Split-Workout-Vorschlag</b> (4.16) – 5 passende Übungen, per Klick übernehmbar</sub></td>
   </tr>
@@ -472,11 +472,11 @@ Aus der Evaluation wurden die folgenden Verbesserungen abgeleitet und priorisier
 2. **Automatische Gym-Workout-Vorschläge (hoch):** Übungen werden passend zum aktiven Split vorgeschlagen (siehe Kap. 4.16).
 3. **Live-Workout-Modus (mittel):** Training aktiv starten und Sets während dem Gym abhaken (siehe Kap. 4.17).
 4. **Unfertige Sportarten zurückgenommen (tief):** Erfassung vorerst auf Kraft & Laufen fokussiert (siehe Kap. 4.18).
+5. **Responsive Layout verbessert (mittel):** Desktop-/Tablet-Ansicht nutzt den Platz besser; das Session-Formular wurde neu ausgerichtet (siehe Kap. 4.21).
 
 **🔜 Für die nächste Iteration festgehalten (als GitHub-Issues):**
 
-5. **Stats interaktiver machen (mittel):** Aktivitäts-Punkte sollen direkt zur passenden Session führen.
-6. **Responsive Layout verbessern (mittel):** Auf Laptop und Tablet soll die App den verfügbaren Platz besser nutzen.
+6. **Stats noch interaktiver machen (mittel):** Aktivitäts-Punkte der Heatmap sollen direkt zur passenden Session führen.
 7. **Spätere Erweiterungen sammeln (tief):** Körpergewicht- und Kalorien-Tracking als mögliche Zukunftsfunktionen.
 
 Bereits vor der formalen Evaluation aus eigenem Testen umgesetzt:
@@ -509,10 +509,10 @@ Die folgenden Erweiterungen wurden über den Mindestumfang der Übungen ab SW8 h
 - **Referenz:** Mockup aus SW9 (Vollbild-Card)
 - **Aus Evaluation abgeleitet?:** Nein, Kernidee aus Sketch-Phase
 
-### 4.3 Streak-Tracking
+### 4.3 Streak-Tracking _(vorerst aus der UI entfernt)_
 
-- **Beschreibung & Nutzen:** Zählt aufeinanderfolgende Wochen mit mindestens einer geloggten Session. Wird als Pill-Badge mit Flame-Icon oben rechts auf dem Dashboard angezeigt. Motivations-Element für Trainings-Konsistenz.
-- **Wo umgesetzt:** Backend [`src/routes/+page.server.js`](src/routes/+page.server.js), Funktion `berechneStreak()`
+- **Beschreibung & Nutzen:** Zählt aufeinanderfolgende Wochen mit mindestens einer geloggten Session. Das Badge wurde **vor der Abgabe bewusst aus der UI entfernt**, um den Fokus auf die Kernfunktionen zu legen. Geplant ist die Rückkehr als interaktive Tages-Streak (klickbare Tageskacheln) inkl. Schrittzähler/Kalorien (siehe Backlog).
+- **Wo umgesetzt:** Backend [`src/routes/+page.server.js`](src/routes/+page.server.js), Funktion `berechneStreak()` (liefert weiterhin Daten; UI-Badge entfernt)
 - **Aus Evaluation abgeleitet?:** Nein
 
 ### 4.4 Wochenziel mit Fortschrittsbalken
@@ -673,6 +673,28 @@ Die folgenden Erweiterungen wurden über den Mindestumfang der Übungen ab SW8 h
   - Frontend: [`src/routes/log/new/+page.svelte`](src/routes/log/new/+page.svelte) (Sport-Auswahl)
 - **Referenz:** Issue "Loggen / Sportarten" (Priorität tief) in Kap. 3.5.6
 - **Aus Evaluation abgeleitet?:** Ja.
+
+### 4.19 Zeitraum-Filter in der Statistik-Übersicht
+
+- **Beschreibung & Nutzen:** Die Übersicht (Totals, Load-Chart, Sport-Verteilung) lässt sich per Pills nach Zeitraum filtern: „Letzte Woche", „4 Wochen", „8 Wochen". Bei „Letzte Woche" wechselt das Balkendiagramm **adaptiv** von Wochen- auf Tagesbalken (Mo–So), damit auch der kurze Zeitraum aussagekräftig bleibt. Zusätzlich wird die Chart-Höhe auf grossen Screens gedeckelt.
+- **Wo umgesetzt:**
+  - Frontend: [`src/routes/stats/+page.svelte`](src/routes/stats/+page.svelte) (reaktive `$derived`-Aggregation nach Zeitraum)
+  - Backend: [`src/routes/stats/+page.server.js`](src/routes/stats/+page.server.js) (leichte Session-Liste `uebersichtSessions`)
+- **Aus Evaluation abgeleitet?:** Teilweise – greift „Stats aussagekräftiger machen" auf.
+
+### 4.20 Vollbild-Fokus-Modus fürs Live-Training
+
+- **Beschreibung & Nutzen:** Beim Start eines Live-Trainings wechselt die Erfassung in eine **ablenkungsfreie Vollbild-Ansicht** – Navigation, Basisdaten und Vorschläge sind ausgeblendet, sichtbar bleiben nur aktive Übung, Sätze und Pausen-Timer. Ein **erzwungener Pausen-Flow** sperrt nach jedem erledigten Satz die offenen Sätze (ausgegraut) und scrollt zum Timer; freigeschaltet wird erst nach Ablauf oder „Pause skippen".
+- **Wo umgesetzt:**
+  - Frontend: [`src/routes/log/new/+page.svelte`](src/routes/log/new/+page.svelte) (`form-fokus`-Overlay, `pauseAktiv`-Satzsperre, Auto-Scroll zum Timer)
+- **Aus Evaluation abgeleitet?:** Ja – Weiterentwicklung des Live-Workout-Modus (überladene Ansicht reduziert).
+
+### 4.21 Navigation-Guard und Layout-Feinschliff
+
+- **Beschreibung & Nutzen:** Ein **Navigation-Guard** warnt vor Datenverlust, wenn `/log/new` mit laufendem Training oder erfassten Übungen verlassen wird. Dazu kommt Layout-Politur: das Basisdaten-Formular ist auf dem Desktop neu in zwei ausgewogenen Spalten ausgerichtet, und Körpergewichts-Übungen im Fortschritt zeigen Sätze × Wdh statt „0 kg".
+- **Wo umgesetzt:**
+  - Frontend: [`src/routes/log/new/+page.svelte`](src/routes/log/new/+page.svelte) (`beforeNavigate` + `beforeunload`, Grid-Layout), [`src/routes/stats/+page.svelte`](src/routes/stats/+page.svelte) (Körpergewichts-Darstellung)
+- **Aus Evaluation abgeleitet?:** Teilweise – adressiert „Responsive Layout".
 
 ---
 
