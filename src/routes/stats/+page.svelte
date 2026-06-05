@@ -233,7 +233,7 @@
 		return `/log?datum=${tag.datum}`;
 	}
 
-	const wochentageLabels = ['Mo', '', 'Mi', '', 'Fr', '', ''];
+	const wochentageLabels = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 	const sportEmoji = {
 		Kraft: '🏋️',
