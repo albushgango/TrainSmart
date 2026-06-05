@@ -1789,7 +1789,7 @@
 		}
 
 		.heatmap {
-			justify-content: center;
+			justify-content: flex-start;
 			overflow-x: visible;
 		}
 
