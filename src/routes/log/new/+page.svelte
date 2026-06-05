@@ -526,6 +526,14 @@
 	);
 	let pauseAnzeige = $derived(formatiereSekunden(pauseRestSek));
 
+	// Auto-Scroll zur Live-Card/Timer, sobald eine Pause startet (Fokus auf den Timer)
+	let liveCardEl = $state(null);
+	$effect(() => {
+		if (pauseAktiv && liveCardEl) {
+			liveCardEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+		}
+	});
+
 	$effect(() => {
 		if (!liveTrackingAktiv) return;
 		const interval = setInterval(() => {
@@ -773,7 +781,7 @@
 					</div>
 
 					{#if uebungen.length > 0}
-						<div class="live-card" class:aktiv={liveTrackingAktiv}>
+						<div class="live-card" class:aktiv={liveTrackingAktiv} bind:this={liveCardEl}>
 							<div class="live-kopf">
 								<div>
 									<span class="live-label">Live Tracking</span>
@@ -951,7 +959,11 @@
 												{#if liveTrackingAktiv}
 													<div class="live-set-liste">
 														{#each uebungMitSets(u).sets as set, satzIdx}
-															<div class="live-set" class:erledigt={set.erledigt}>
+															<div
+																class="live-set"
+																class:erledigt={set.erledigt}
+																class:gesperrt={pauseAktiv && !set.erledigt}
+															>
 																<button
 																	type="button"
 																	class="live-check"
@@ -2181,6 +2193,13 @@
 	.live-set.erledigt {
 		border-color: var(--accent);
 		background: rgba(132, 204, 22, 0.1);
+	}
+
+	/* Erzwungene Pause: offene Sätze gesperrt, bis Timer abläuft oder geskippt wird */
+	.live-set.gesperrt {
+		opacity: 0.5;
+		pointer-events: none;
+		filter: grayscale(0.3);
 	}
 
 	.live-check,
