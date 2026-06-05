@@ -88,6 +88,19 @@
 	let neueUebungAktiv = $state(false);
 	let uebungSuche = $state('');
 	let dropdownOffen = $state(false);
+	let ueComboEl = $state(null);
+
+	// Übungs-Dropdown schliessen, wenn ausserhalb geklickt wird
+	$effect(() => {
+		if (!dropdownOffen) return;
+		function handleAussenklick(e) {
+			if (ueComboEl && !ueComboEl.contains(e.target)) {
+				dropdownOffen = false;
+			}
+		}
+		window.addEventListener('mousedown', handleAussenklick);
+		return () => window.removeEventListener('mousedown', handleAussenklick);
+	});
 	let saetzeInput = $state(4);
 	let wdhInput = $state(8);
 	let gewichtInput = $state(0);
@@ -107,6 +120,19 @@
 	let letzterVorschlagKey = $state('');
 	let vorschlagSuche = $state('');
 	let vorschlagDropdownOffen = $state(false);
+	let vorschlagComboEl = $state(null);
+
+	// Vorschlag-Dropdown schliessen, wenn ausserhalb geklickt wird
+	$effect(() => {
+		if (!vorschlagDropdownOffen) return;
+		function handleAussenklick(e) {
+			if (vorschlagComboEl && !vorschlagComboEl.contains(e.target)) {
+				vorschlagDropdownOffen = false;
+			}
+		}
+		window.addEventListener('mousedown', handleAussenklick);
+		return () => window.removeEventListener('mousedown', handleAussenklick);
+	});
 
 	$effect(() => {
 		const key = aktuellerVorschlagKey;
@@ -868,7 +894,7 @@
 
 									<div class="wv-add">
 										<div class="wv-add-row">
-											<div class="wv-add-combobox">
+											<div class="wv-add-combobox" bind:this={vorschlagComboEl}>
 												<input
 													type="text"
 													placeholder="Übung zum Vorschlag hinzufügen..."
@@ -1133,7 +1159,7 @@
 							{:else}
 								<div class="ue-form">
 									<!-- Combobox: Suche + Dropdown mit Vorschlägen -->
-									<div class="ue-combobox">
+									<div class="ue-combobox" bind:this={ueComboEl}>
 										<input
 											type="text"
 											class="ue-suche"
