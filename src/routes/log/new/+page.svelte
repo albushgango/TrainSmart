@@ -2,6 +2,7 @@
 	import { subtypenFuer } from '$lib/splits.js';
 	import { filtereUebungen, SUBTYP_GRUPPEN, workoutVorschlagFuer } from '$lib/uebungen.js';
 	import { paceProKm, geschwindigkeitKmh } from '$lib/lauf.js';
+	import { beforeNavigate } from '$app/navigation';
 
 	let { data, form } = $props();
 	let rpe = $state(5);
@@ -56,6 +57,32 @@
 	let pauseEndZeit = $state(null);
 	let pauseGesamtSek = $state(PAUSEN_DAUER_SEK);
 	let aktiverLiveEditor = $state(null);
+
+	// ── Navigation-Guard: warnen, wenn eine Session ungespeichert/aktiv ist ──
+	let wirdGespeichert = $state(false);
+	let istUngespeichert = $derived(!wirdGespeichert && (liveTrackingAktiv || uebungen.length > 0));
+
+	beforeNavigate((nav) => {
+		if (
+			istUngespeichert &&
+			!confirm(
+				'Möchtest du diese Seite wirklich verlassen? Deine aktuelle Session ist noch nicht gespeichert und die Daten gehen verloren.'
+			)
+		) {
+			nav.cancel();
+		}
+	});
+
+	$effect(() => {
+		function handler(e) {
+			if (istUngespeichert) {
+				e.preventDefault();
+				e.returnValue = '';
+			}
+		}
+		window.addEventListener('beforeunload', handler);
+		return () => window.removeEventListener('beforeunload', handler);
+	});
 
 	// Form-State für neue Übung
 	let neueUebungAktiv = $state(false);
@@ -543,7 +570,7 @@
 		<p class="error">{form.error}</p>
 	{/if}
 
-	<form method="POST">
+	<form method="POST" onsubmit={() => (wirdGespeichert = true)}>
 		{#if kamVonEmpfehlung}
 			<div class="coach-hinweis">
 				<span class="coach-label">Aus deiner Tagesempfehlung</span>
