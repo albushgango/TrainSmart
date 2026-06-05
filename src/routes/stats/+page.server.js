@@ -35,6 +35,11 @@ function letzteNWochen(n) {
 	return result;
 }
 
+/** Lokales ISO-Datum (YYYY-MM-DD) ohne UTC-Verschiebung – passt zu getDay() */
+function lokalesDatum(d) {
+	return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
 export async function load() {
 	await connectDB();
 	const [alleSessions, profil] = await Promise.all([
@@ -80,7 +85,7 @@ export async function load() {
 		const tag = new Date(heute);
 		tag.setDate(heute.getDate() - i);
 		heatmapTage.push({
-			datum: tag.toISOString().split('T')[0],
+			datum: lokalesDatum(tag),
 			wochentag: tag.getDay(), // 0=So, 1=Mo ... 6=Sa
 			load: 0,
 			sessions: 0,
@@ -90,7 +95,7 @@ export async function load() {
 
 	const heatmapMap = new Map(heatmapTage.map((t) => [t.datum, t]));
 	alleSessions.forEach((s) => {
-		const datumKey = new Date(s.datum).toISOString().split('T')[0];
+		const datumKey = lokalesDatum(new Date(s.datum));
 		const eintrag = heatmapMap.get(datumKey);
 		if (eintrag) {
 			eintrag.load += (s.dauer || 0) * (s.rpe || 0);

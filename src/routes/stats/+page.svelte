@@ -217,7 +217,7 @@
 
 	function tagTitel(tag) {
 		if (!tag) return '';
-		const datum = new Date(tag.datum).toLocaleDateString('de-CH', {
+		const datum = new Date(tag.datum + 'T00:00:00').toLocaleDateString('de-CH', {
 			weekday: 'short',
 			day: 'numeric',
 			month: 'short'
