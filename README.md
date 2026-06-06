@@ -4,6 +4,7 @@
 
 🔗 **Live-Demo:** [trainsmartv1.netlify.app](https://trainsmartv1.netlify.app)
 📦 **Repository:** [github.com/albushgango/TrainSmart](https://github.com/albushgango/TrainSmart)
+🎬 **Video-Walkthrough:** als separate Datei in der Moodle-Abgabe
 
 ---
 
