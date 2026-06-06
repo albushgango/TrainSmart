@@ -120,28 +120,31 @@
 				{/each}
 
 				<!-- Custom-Split -->
-				<label class="split-option" class:gewaehlt={gewaehlterSplit === 'custom'}>
-					<input type="radio" name="aktiverSplit" value="custom" bind:group={gewaehlterSplit} />
-					<div class="split-info">
-						<div class="split-titel">Eigener Split</div>
-						<div class="split-beschr">Definiere deine eigene Rotation (kommasepariert)</div>
+				<div class="split-option custom-split" class:gewaehlt={gewaehlterSplit === 'custom'}>
+					<label class="custom-head">
+						<input type="radio" name="aktiverSplit" value="custom" bind:group={gewaehlterSplit} />
+						<div class="split-info">
+							<div class="split-titel">Eigener Split</div>
+							<div class="split-beschr">Definiere deine eigene Rotation (kommasepariert)</div>
+						</div>
+					</label>
+					{#if gewaehlterSplit === 'custom'}
 						<input
 							type="text"
 							name="customSplitTage"
 							bind:value={customTageText}
 							placeholder="z.B. Brust, Rücken, Beine, Arme"
 							class="custom-input"
-							disabled={gewaehlterSplit !== 'custom'}
 						/>
-						{#if gewaehlterSplit === 'custom' && vorschauTage.length > 0}
+						{#if vorschauTage.length > 0}
 							<div class="split-tage">
 								{#each vorschauTage as tag}
 									<span class="tag-pill">{tag}</span>
 								{/each}
 							</div>
 						{/if}
-					</div>
-				</label>
+					{/if}
+				</div>
 			</div>
 
 			<button type="submit" class="btn-primary btn-full">Split speichern</button>
@@ -375,6 +378,17 @@
 		background: rgba(132, 204, 22, 0.1);
 		border-color: rgba(132, 204, 22, 0.4);
 		color: var(--accent);
+	}
+
+	.custom-split {
+		flex-direction: column;
+	}
+
+	.custom-head {
+		display: flex;
+		align-items: flex-start;
+		gap: 0.75rem;
+		cursor: pointer;
 	}
 
 	.custom-input {
