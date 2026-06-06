@@ -334,7 +334,7 @@
 			0 0 16px var(--accent-glow);
 	}
 
-	.split-option input {
+	.split-option input[type='radio'] {
 		display: none;
 	}
 
