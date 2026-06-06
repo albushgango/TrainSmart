@@ -1,5 +1,5 @@
 <script>
-	import { SPLITS } from '$lib/splits.js';
+	import { SPLITS, SUBTYPEN_NACH_SPORT } from '$lib/splits.js';
 	import { enhance } from '$app/forms';
 
 	let { data, form } = $props();
@@ -13,15 +13,51 @@
 	// Splits als Array für #each
 	const splitListe = Object.values(SPLITS);
 
-	// Aktive Tage des aktuell gewählten Splits (für Vorschau)
-	let vorschauTage = $derived.by(() => {
-		if (gewaehlterSplit === 'custom') {
-			return customTageText
-				.split(',')
-				.map((t) => t.trim())
-				.filter(Boolean);
+	// ── Eigener Split: kontrollierte Auswahl aus hinterlegten Trainingstagen ──
+	const VERFUEGBARE_SPLIT_TAGE = [
+		...new Set([...Object.values(SPLITS).flatMap((s) => s.tage), ...SUBTYPEN_NACH_SPORT.Kraft])
+	];
+
+	// Aktuell gewählte Rotation als Array (Quelle bleibt customTageText für den Form-Submit)
+	let customTage = $derived(
+		customTageText
+			.split(',')
+			.map((t) => t.trim())
+			.filter(Boolean)
+	);
+
+	let customSuche = $state('');
+	let customDropdownOffen = $state(false);
+	let customComboEl = $state(null);
+
+	// Vorschläge: alle hinterlegten Tage, die zur Suche passen und noch nicht gewählt sind
+	let gefilterteTage = $derived(
+		VERFUEGBARE_SPLIT_TAGE.filter(
+			(t) => t.toLowerCase().includes(customSuche.toLowerCase()) && !customTage.includes(t)
+		)
+	);
+
+	function tagHinzufuegen(tag) {
+		if (customTage.includes(tag)) return;
+		customTageText = [...customTage, tag].join(', ');
+		customSuche = '';
+		customDropdownOffen = false;
+	}
+
+	function tagEntfernen(tag) {
+		customTageText = customTage.filter((t) => t !== tag).join(', ');
+	}
+
+	// Dropdown schliessen bei Klick ausserhalb
+	$effect(() => {
+		if (!customDropdownOffen) return;
+		function handleAussenklick(e) {
+			if (customComboEl && !customComboEl.contains(e.target)) {
+				customDropdownOffen = false;
+			}
 		}
-		return SPLITS[gewaehlterSplit]?.tage ?? [];
+		window.addEventListener('mousedown', handleAussenklick);
+		return () => window.removeEventListener('mousedown', handleAussenklick);
 	});
 </script>
 
@@ -125,24 +161,46 @@
 						<input type="radio" name="aktiverSplit" value="custom" bind:group={gewaehlterSplit} />
 						<div class="split-info">
 							<div class="split-titel">Eigener Split</div>
-							<div class="split-beschr">Definiere deine eigene Rotation (kommasepariert)</div>
+							<div class="split-beschr">Stelle deine Rotation aus den Trainingstagen zusammen</div>
 						</div>
 					</label>
 					{#if gewaehlterSplit === 'custom'}
-						<input
-							type="text"
-							name="customSplitTage"
-							bind:value={customTageText}
-							placeholder="z.B. Brust, Rücken, Beine, Arme"
-							class="custom-input"
-						/>
-						{#if vorschauTage.length > 0}
-							<div class="split-tage">
-								{#each vorschauTage as tag}
-									<span class="tag-pill">{tag}</span>
+						{#if customTage.length > 0}
+							<div class="custom-rotation">
+								{#each customTage as tag, i (tag)}
+									<span class="rotation-pill">
+										<span class="rotation-nr">{i + 1}</span>
+										{tag}
+										<button
+											type="button"
+											class="rotation-remove"
+											onclick={() => tagEntfernen(tag)}
+											aria-label="{tag} entfernen">×</button
+										>
+									</span>
 								{/each}
 							</div>
 						{/if}
+						<div class="custom-combo" bind:this={customComboEl}>
+							<input
+								type="text"
+								class="custom-input"
+								bind:value={customSuche}
+								onfocus={() => (customDropdownOffen = true)}
+								placeholder="Trainingstag wählen …"
+								autocomplete="off"
+							/>
+							{#if customDropdownOffen && gefilterteTage.length > 0}
+								<div class="custom-dropdown">
+									{#each gefilterteTage as tag (tag)}
+										<button type="button" class="custom-option" onclick={() => tagHinzufuegen(tag)}
+											>{tag}</button
+										>
+									{/each}
+								</div>
+							{/if}
+						</div>
+						<input type="hidden" name="customSplitTage" value={customTageText} />
 					{/if}
 				</div>
 			</div>
@@ -389,6 +447,90 @@
 		align-items: flex-start;
 		gap: 0.75rem;
 		cursor: pointer;
+	}
+
+	.custom-rotation {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.4rem;
+		margin-top: 0.6rem;
+	}
+
+	.rotation-pill {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.35rem;
+		padding: 0.25rem 0.5rem 0.25rem 0.3rem;
+		background: rgba(132, 204, 22, 0.12);
+		border: 1px solid rgba(132, 204, 22, 0.4);
+		border-radius: 999px;
+		font-size: 0.8rem;
+		color: var(--accent);
+		font-weight: 600;
+	}
+
+	.rotation-nr {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		background: var(--accent);
+		color: #0a0e14;
+		font-size: 0.7rem;
+		font-weight: 800;
+	}
+
+	.rotation-remove {
+		background: none;
+		border: none;
+		color: var(--accent);
+		cursor: pointer;
+		font-size: 1rem;
+		line-height: 1;
+		padding: 0;
+		opacity: 0.7;
+	}
+
+	.rotation-remove:hover {
+		opacity: 1;
+	}
+
+	.custom-combo {
+		position: relative;
+		margin-top: 0.6rem;
+	}
+
+	.custom-dropdown {
+		position: absolute;
+		top: calc(100% + 4px);
+		left: 0;
+		right: 0;
+		z-index: 20;
+		background: var(--bg-card);
+		border: 1px solid var(--border);
+		border-radius: 8px;
+		max-height: 220px;
+		overflow-y: auto;
+		box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+	}
+
+	.custom-option {
+		display: block;
+		width: 100%;
+		text-align: left;
+		padding: 0.5rem 0.75rem;
+		background: none;
+		border: none;
+		color: var(--text-primary);
+		font-size: 0.85rem;
+		cursor: pointer;
+	}
+
+	.custom-option:hover {
+		background: var(--bg-elevated);
+		color: var(--accent);
 	}
 
 	.custom-input {
